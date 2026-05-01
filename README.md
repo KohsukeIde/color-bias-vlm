@@ -1,6 +1,8 @@
 # Seeing Red, Thinking Bad: Color Bias in Vision Language Models
 
-> **Project page** for *Seeing Red, Thinking Bad: Color Bias in Vision Language Models*.
+[![Venue](https://img.shields.io/badge/ICPR-2026-1f6feb)](https://icpr2026.org/)
+
+> **Project page** for *Seeing Red, Thinking Bad: Color Bias in Vision Language Models*, **ICPR 2026**.
 >
 > Kohsuke Ide, Ryousuke Yamada, Yoshihiro Fukuhara, Hirokatsu Kataoka, Yutaka Satoh.
 >
@@ -166,6 +168,7 @@ If you find this work useful, please consider citing:
 @inproceedings{ide2026seeingred,
   title     = {Seeing Red, Thinking Bad: Color Bias in Vision Language Models},
   author    = {Ide, Kohsuke and Yamada, Ryousuke and Fukuhara, Yoshihiro and Kataoka, Hirokatsu and Satoh, Yutaka},
+  booktitle = {Proceedings of the International Conference on Pattern Recognition (ICPR)},
   year      = {2026}
 }
 ```
