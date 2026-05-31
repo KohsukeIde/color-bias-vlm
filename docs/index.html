@@ -129,10 +129,10 @@
   <div class="container">
     <h2 class="title is-4 sec-title centered">Sweep the hue, watch the meaning move</h2>
     <p class="body-text centered narrow-c">
-      The word string never changes — only its ink hue. Yet a CLIP vision encoder places the recolored word
-      at a different location in concept space. Drag the slider to sweep the hue and watch the embedding and
-      its semantic-axis projections respond, live, from <b>real measured data</b>
-      (CLIP&nbsp;ViT-L/14-336, 72 hues per word).
+      The word string never changes — only its ink hue. Yet, a Vision encoder (CLIP) places the recolored
+      word at a different location in concept space. Drag the slider to sweep the hue and watch how strongly
+      the word reads as its own meaning (e.g. how <i>warm</i> "warm" looks), live, from
+      <b>real measured data</b> (CLIP&nbsp;ViT-L/14-336, 72 hues per word).
     </p>
 
     <div class="viz-shell">
@@ -148,8 +148,8 @@
         <div class="ctrl">
           <label>Embedding view</label>
           <div class="buttons has-addons" id="viewToggle">
-            <button class="button is-small is-active" data-view="semantic">Semantic plane</button>
-            <button class="button is-small" data-view="pca">CLIP PCA</button>
+            <button class="button is-small is-active" data-view="axis">Antonym axis</button>
+            <button class="button is-small" data-view="pca">Raw embedding (PCA)</button>
           </div>
         </div>
       </div>
@@ -157,16 +157,16 @@
       <div class="viz-grid">
         <div class="viz-card stimulus-card">
           <div class="card-label">Rendered stimulus</div>
-          <div id="stimulusWord" class="stimulus-word">terrible</div>
+          <div class="stimulus-canvas"><span id="stimulusWord" class="stimulus-word">warm</span></div>
           <div class="swatch-row"><span id="swatch" class="swatch"></span>
             <span id="swatchHex" class="mono small"></span></div>
         </div>
         <div class="viz-card">
-          <div class="card-label" id="planeLabel">Semantic plane &middot; valence × emotion</div>
+          <div class="card-label" id="planeLabel">Antonym axis</div>
           <svg id="planeSvg" viewBox="0 0 360 300" preserveAspectRatio="xMidYMid meet"></svg>
         </div>
         <div class="viz-card">
-          <div class="card-label">Semantic-axis projections vs. hue</div>
+          <div class="card-label">Projection vs. ink hue (0–360°)</div>
           <svg id="curvesSvg" viewBox="0 0 360 300" preserveAspectRatio="xMidYMid meet"></svg>
         </div>
       </div>
