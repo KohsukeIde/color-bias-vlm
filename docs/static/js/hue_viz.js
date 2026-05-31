@@ -53,186 +53,114 @@
     document.getElementById("hueVal").textContent = state.hue + "°";
   }
 
-  // ---------------- embedding panel ----------------
-  function renderPlane() { return state.view === "pca" ? render3D() : renderAxisView(); }
+  // ============ panels ============
+  // Middle = the selected word; Right = pure colour (no word), SAME view, so
+  // you compare "word in colour" vs "colour alone" side by side.
 
-  // Default view: a big curve of the word's OWN axis (e.g. cold↔warm) vs. ink
-  // hue. Fills the panel; the y-axis poles make "which way is which" explicit.
-  function renderAxisView() {
-    const svg = d3.select("#planeSvg"); svg.selectAll("*").remove();
+  // Antonym-axis big curve of `rs` on bipolar axis `key`, titled by `name`.
+  function renderAxis(svgSel, rs, key, name, labelId, labelHtml) {
+    const svg = d3.select(svgSel); svg.selectAll("*").remove();
     svg.style("cursor", "default");
     const P = pal();
     const W = 360, H = 300, m = { t: 54, r: 16, b: 30, l: 30 };
-    const key = primaryAxis(state.word);
     const info = axisInfo[key] || { pos: key, neg: "not-" + key };
-    const rs = rows();
     const vals = rs.map((d) => d.proj[key]);
     const lo = Math.min(...vals), hi = Math.max(...vals), p = (hi - lo) * 0.18 || 0.02;
     const x = d3.scaleLinear().domain([0, 360]).range([m.l, W - m.r]);
     const y = d3.scaleLinear().domain([lo - p, hi + p]).range([H - m.b, m.t]);
-    const cur = rowAt(state.hue);
+    const cur = rs.reduce((a, b) => Math.abs(b.hue - state.hue) < Math.abs(a.hue - state.hue) ? b : a);
     const red = rs.reduce((a, b) => Math.abs(b.hue) < Math.abs(a.hue) ? b : a);
     const sgn = (n) => (n >= 0 ? "+" : "");
+    document.getElementById(labelId).innerHTML = labelHtml;
 
-    document.getElementById("planeLabel").innerHTML = `Antonym axis &middot; ${info.neg} ↔ ${info.pos}`;
-
-    // top readout: lean toward whichever pole the sign points to, + Δ vs red
     const pole = cur.proj[key] >= 0 ? info.pos : info.neg;
     svg.append("text").attr("x", W / 2).attr("y", 22).attr("text-anchor", "middle")
       .attr("class", "ct").attr("fill", P.strong).attr("font-size", "14px").attr("font-weight", 700)
-      .text(`“${dispName(state.word)}” leans ${Math.abs(cur.proj[key]).toFixed(3)} toward ${pole}`);
+      .text(`“${name}” leans ${Math.abs(cur.proj[key]).toFixed(3)} toward ${pole}`);
     svg.append("text").attr("x", W / 2).attr("y", 41).attr("text-anchor", "middle")
       .attr("class", "ax").attr("fill", P.axis)
       .text(`${sgn(cur.proj[key] - red.proj[key])}${(cur.proj[key] - red.proj[key]).toFixed(3)} toward ${info.pos} vs. red ink (0°)`);
 
-    // frame + zero line
     svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", H - m.b).attr("y2", H - m.b).attr("stroke", P.grid);
     svg.append("line").attr("x1", m.l).attr("x2", m.l).attr("y1", m.t).attr("y2", H - m.b).attr("stroke", P.grid);
     if (lo - p < 0 && hi + p > 0)
       svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(0)).attr("y2", y(0))
         .attr("stroke", P.grid).attr("stroke-dasharray", "3 3");
-    // y-axis poles (top = pos, bottom = neg) — makes the vertical meaning explicit
     svg.append("text").attr("x", m.l + 4).attr("y", m.t + 4).attr("class", "ax").attr("fill", P.strong)
       .attr("font-weight", 700).text("↑ " + info.pos);
     svg.append("text").attr("x", m.l + 4).attr("y", H - m.b - 5).attr("class", "ax").attr("fill", P.strong)
       .attr("font-weight", 700).text("↓ " + info.neg);
-    // x ticks (ink hue)
     [0, 90, 180, 270, 360].forEach((hv) => svg.append("text").attr("x", x(hv)).attr("y", H - m.b + 12)
       .attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis).attr("font-size", "8px").text(hv));
     svg.append("text").attr("x", (W + m.l - m.r) / 2).attr("y", H - 3).attr("text-anchor", "middle")
       .attr("class", "ax").attr("fill", P.axis).text("ink hue (°)");
-    // hue-colored line + dots
-    const line = d3.line().x((d) => x(d.hue)).y((d) => y(d.proj[key]));
-    svg.append("path").datum(rs).attr("d", line).attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1.6);
+    svg.append("path").datum(rs).attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1.6)
+      .attr("d", d3.line().x((d) => x(d.hue)).y((d) => y(d.proj[key])));
     svg.selectAll("circle.pt").data(rs).enter().append("circle")
       .attr("cx", (d) => x(d.hue)).attr("cy", (d) => y(d.proj[key])).attr("r", 2.6)
       .attr("fill", (d) => colorForHue(d.hue)).attr("stroke", P.ring).attr("stroke-width", .5);
-    // cursor + current marker
     svg.append("line").attr("x1", x(cur.hue)).attr("x2", x(cur.hue)).attr("y1", m.t).attr("y2", H - m.b)
       .attr("stroke", P.strong).attr("stroke-width", 1).attr("opacity", .4);
     svg.append("circle").attr("cx", x(cur.hue)).attr("cy", y(cur.proj[key])).attr("r", 8)
       .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 2);
   }
 
-  // Secondary view: the raw 768-d embedding as a rotatable 3-D PCA loop.
-  // PCA(2) only holds ~50% of the path; PCA(3) ~63% and shows it is a
-  // non-planar, closed ring (drag to rotate). Honest > pretty.
-  function render3D() {
-    const svg = d3.select("#planeSvg"); svg.selectAll("*").remove();
+  // Rotatable 3-D PCA loop of `rs` (drag to rotate). varKey -> variance readout.
+  function render3D(svgSel, rs, varKey, labelId, labelHtml) {
+    const svg = d3.select(svgSel); svg.selectAll("*").remove();
     const P = pal();
     const W = 360, H = 300, cx = W / 2, cy = H / 2 + 4;
     svg.style("cursor", "grab");
-    const rs = rows();
     const mx = mean(rs.map((d) => d.wx)), my = mean(rs.map((d) => d.wy)), mz = mean(rs.map((d) => d.wz || 0));
     const pts = rs.map((d) => ({ x: d.wx - mx, y: d.wy - my, z: (d.wz || 0) - mz, hue: d.hue }));
-    const maxr = Math.max(...pts.map((p) => Math.hypot(p.x, p.y, p.z))) || 1;
+    const maxr = Math.max(...pts.map((q) => Math.hypot(q.x, q.y, q.z))) || 1;
     const scale = (Math.min(W, H) / 2 - 30) / maxr;
-    const cur = rowAt(state.hue);
-    const curC = { x: cur.wx - mx, y: cur.wy - my, z: (cur.wz || 0) - mz, hue: cur.hue };
-    const vv = (DATA.meta.withinWordPcaVar || {})[state.word] || [];
-    const pct = vv.length >= 3 && vv.every(Number.isFinite)
-      ? Math.round((vv[0] + vv[1] + vv[2]) * 100) : null;
-    document.getElementById("planeLabel").innerHTML = "Raw embedding &middot; PCA(3), drag to rotate";
+    const cr = rs.reduce((a, b) => Math.abs(b.hue - state.hue) < Math.abs(a.hue - state.hue) ? b : a);
+    const curC = { x: cr.wx - mx, y: cr.wy - my, z: (cr.wz || 0) - mz, hue: cr.hue };
+    const vv = (DATA.meta.withinWordPcaVar || {})[varKey] || [];
+    const pct = vv.length >= 3 && vv.every(Number.isFinite) ? Math.round((vv[0] + vv[1] + vv[2]) * 100) : null;
+    document.getElementById(labelId).innerHTML = labelHtml;
 
-    const proj = (p) => {
+    const proj = (q) => {
       const cY = Math.cos(rot.y), sY = Math.sin(rot.y);
-      const x1 = p.x * cY - p.z * sY, z1 = p.x * sY + p.z * cY;
+      const x1 = q.x * cY - q.z * sY, z1 = q.x * sY + q.z * cY;
       const cX = Math.cos(rot.x), sX = Math.sin(rot.x);
-      const y1 = p.y * cX - z1 * sX, z2 = p.y * sX + z1 * cX;
+      const y1 = q.y * cX - z1 * sX, z2 = q.y * sX + z1 * cX;
       return { sx: cx + x1 * scale, sy: cy - y1 * scale, depth: z2 };
     };
-    const pr = pts.map((p) => ({ ...proj(p), hue: p.hue }));
-    // connecting loop (hue order, closed)
+    const pr = pts.map((q) => ({ ...proj(q), hue: q.hue }));
     svg.append("path").attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1).attr("opacity", .55)
-      .attr("d", d3.line().x((p) => p.sx).y((p) => p.sy)(pr.concat([pr[0]])));
-    // depth-sorted hue dots (far & dim first)
+      .attr("d", d3.line().x((q) => q.sx).y((q) => q.sy)(pr.concat([pr[0]])));
     const ds = pr.map((d) => d.depth), dmin = Math.min(...ds), dmax = Math.max(...ds);
     const dep = (d) => (dmax === dmin ? 0.5 : (d.depth - dmin) / (dmax - dmin));
     svg.selectAll("circle.p3").data([...pr].sort((a, b) => a.depth - b.depth)).enter().append("circle")
       .attr("cx", (d) => d.sx).attr("cy", (d) => d.sy).attr("r", (d) => 2 + 2 * dep(d))
       .attr("fill", (d) => colorForHue(d.hue)).attr("opacity", (d) => 0.45 + 0.55 * dep(d))
       .attr("stroke", P.ring).attr("stroke-width", .4);
-    // current marker
     const pc = proj(curC);
     svg.append("circle").attr("cx", pc.sx).attr("cy", pc.sy).attr("r", 8)
-      .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 2);
-    // hint
+      .attr("fill", colorForHue(cr.hue)).attr("stroke", P.strong).attr("stroke-width", 2);
     svg.append("text").attr("x", W - 8).attr("y", H - 8).attr("text-anchor", "end")
       .attr("class", "ax").attr("fill", P.axis).attr("font-size", "9px")
-      .text("drag to rotate" + (pct != null ? " · PC1–3 ≈ " + pct + "% of variance" : ""));
+      .text("drag to rotate" + (pct != null ? " · PC1–3 ≈ " + pct + "%" : ""));
   }
 
-  // ---------------- right panel (stacked, full-width), view-aware ----------------
-  // axis view -> the OTHER semantic axes; pca view -> the loop unrolled (PC1,PC2 vs hue)
-  function renderCurves() {
-    const svg = d3.select("#curvesSvg"); svg.selectAll("*").remove();
-    const P = pal();
-    const rs = rows(), cur = rowAt(state.hue);
-    let series, label;
+  // render both panels: middle = word, right = pure colour, same view & axis
+  function renderViews() {
+    const wordRows = rows();
+    const colorRows = DATA.data[COLOR_ONLY] || wordRows;
     if (state.view === "pca") {
-      label = "The loop, unrolled: each PCA coordinate vs. ink hue";
-      series = [
-        { name: "PC1", val: (d) => d.wx, pos: "", neg: "" },
-        { name: "PC2", val: (d) => d.wy, pos: "", neg: "" },
-        { name: "PC3", val: (d) => d.wz || 0, pos: "", neg: "" },
-      ];
+      render3D("#planeSvg", wordRows, state.word, "planeLabel", `“${dispName(state.word)}” &middot; raw embedding (3-D)`);
+      render3D("#curvesSvg", colorRows, COLOR_ONLY, "curvesLabel", "Pure colour &middot; raw embedding (3-D)");
     } else {
-      label = "The other semantic axes vs. ink hue";
-      const pk = primaryAxis(state.word);
-      series = CURVE_AXES.filter((a) => a !== pk).map((a) => {
-        const info = axisInfo[a] || { pos: a, neg: "" };
-        return { name: axisLabel[a] || a, val: (d) => d.proj[a], pos: info.pos, neg: info.neg };
-      });
+      const key = primaryAxis(state.word);
+      const info = axisInfo[key] || { pos: key, neg: "?" };
+      renderAxis("#planeSvg", wordRows, key, dispName(state.word), "planeLabel", `“${dispName(state.word)}” &middot; ${info.neg} ↔ ${info.pos}`);
+      renderAxis("#curvesSvg", colorRows, key, "pure colour", "curvesLabel", `Pure colour &middot; ${info.neg} ↔ ${info.pos}`);
     }
-    const cl = document.getElementById("curvesLabel"); if (cl) cl.textContent = label;
-
-    const W = 360, H = 300, top = 14, mL = 60, mR = 12, rowGap = 18, bottom = 24;
-    const n = series.length;
-    const rh = (H - top - rowGap * (n - 1) - bottom) / n;
-    series.forEach((s, i) => {
-      const oy = top + i * (rh + rowGap);
-      const vals = rs.map(s.val);
-      const lo = Math.min(...vals), hi = Math.max(...vals), p = (hi - lo) * 0.18 || 0.02;
-      const x = d3.scaleLinear().domain([0, 360]).range([mL, W - mR]);
-      const y = d3.scaleLinear().domain([lo - p, hi + p]).range([oy + rh, oy]);
-      svg.append("rect").attr("x", mL).attr("y", oy).attr("width", W - mR - mL).attr("height", rh)
-        .attr("fill", "none").attr("stroke", P.grid);
-      if (lo - p < 0 && hi + p > 0)
-        svg.append("line").attr("x1", mL).attr("x2", W - mR).attr("y1", y(0)).attr("y2", y(0))
-          .attr("stroke", P.grid).attr("stroke-dasharray", "3 3");
-      // y-axis poles (semantic view only)
-      if (s.pos) {
-        svg.append("text").attr("x", mL - 6).attr("y", oy + 8).attr("text-anchor", "end")
-          .attr("class", "ax").attr("fill", P.axis).attr("font-size", "8.5px").text(s.pos);
-        svg.append("text").attr("x", mL - 6).attr("y", oy + rh - 1).attr("text-anchor", "end")
-          .attr("class", "ax").attr("fill", P.axis).attr("font-size", "8.5px").text(s.neg);
-      }
-      // name + live value
-      const v = s.val(cur);
-      svg.append("text").attr("x", mL + 4).attr("y", oy - 3).attr("class", "ct").attr("fill", P.axis)
-        .html(`${s.name}: <tspan class="val">${v >= 0 ? "+" : ""}${v.toFixed(3)}</tspan>`);
-      // line + hue dots
-      const line = d3.line().x((d) => x(d.hue)).y((d) => y(s.val(d)));
-      svg.append("path").datum(rs).attr("d", line).attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1.2);
-      svg.selectAll("c" + i).data(rs).enter().append("circle")
-        .attr("cx", (d) => x(d.hue)).attr("cy", (d) => y(s.val(d))).attr("r", 1.6)
-        .attr("fill", (d) => colorForHue(d.hue));
-      // cursor + marker
-      svg.append("line").attr("x1", x(cur.hue)).attr("x2", x(cur.hue)).attr("y1", oy).attr("y2", oy + rh)
-        .attr("stroke", P.strong).attr("stroke-width", 1).attr("opacity", .4);
-      svg.append("circle").attr("cx", x(cur.hue)).attr("cy", y(s.val(cur))).attr("r", 4)
-        .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 1.4);
-      // x ticks on the last row only
-      if (i === n - 1) {
-        [0, 90, 180, 270, 360].forEach((hv) => svg.append("text").attr("x", x(hv)).attr("y", oy + rh + 11)
-          .attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis).attr("font-size", "8px").text(hv));
-        svg.append("text").attr("x", (mL + W - mR) / 2).attr("y", oy + rh + 21).attr("text-anchor", "middle")
-          .attr("class", "ax").attr("fill", P.axis).text("ink hue (°)");
-      }
-    });
   }
 
-  function renderAll() { renderStimulus(); renderPlane(); renderCurves(); }
+  function renderAll() { renderStimulus(); renderViews(); }
 
   // ---------------- init ----------------
   function init(data) {
@@ -247,9 +175,10 @@
     const sel = document.getElementById("wordSelect");
     const sentiment = new Set(data.meta.sentimentWords || []);
     data.meta.words.forEach((w) => {
+      if (w === COLOR_ONLY) return;        // shown as the fixed right-hand comparison, not selectable
       const o = document.createElement("option");
       o.value = w;
-      o.textContent = w === COLOR_ONLY ? "■ colour only (no word)" : (sentiment.has(w) ? w + "  (sentiment)" : w);
+      o.textContent = sentiment.has(w) ? w + "  (sentiment)" : w;
       sel.appendChild(o);
     });
     sel.value = state.word;
@@ -258,28 +187,29 @@
     document.getElementById("hueSlider").addEventListener("input", (e) => {
       state.hue = +e.target.value; renderAll();
     });
-    // drag to rotate the 3-D raw-embedding view
-    d3.select("#planeSvg").call(d3.drag().on("drag", (e) => {
+    // drag either 3-D panel to rotate both (shared orientation)
+    const dragH = d3.drag().on("drag", (e) => {
       if (state.view !== "pca") return;
-      rot.y -= e.dx * 0.012; rot.x += e.dy * 0.012; render3D();
-    }));
+      rot.y -= e.dx * 0.012; rot.x += e.dy * 0.012; renderViews();
+    });
+    d3.select("#planeSvg").call(dragH);
+    d3.select("#curvesSvg").call(dragH);
     document.querySelectorAll("#viewToggle button").forEach((b) => {
       b.addEventListener("click", () => {
         state.view = b.dataset.view;
         document.querySelectorAll("#viewToggle button").forEach((x) => x.classList.remove("is-active"));
-        b.classList.add("is-active"); renderPlane(); renderCurves();
+        b.classList.add("is-active"); renderViews();
       });
     });
 
     document.getElementById("vizNote").innerHTML =
-      `<b>The takeaway:</b> recolouring steers the encoder in two ways. <b>(1) Colour itself carries meaning</b> ` +
-      `— pick <b>■ colour only</b>: a plain green swatch already leans <i>positive / safe</i>, a red one ` +
-      `<i>negative</i>, with no word at all. <b>(2) But colouring a <i>word</i> is more than adding that ` +
-      `colour vector</b>: a word's hue-driven movement overlaps the pure-colour direction by only ~8%, so the ` +
-      `colour largely <i>reshapes how that specific word is represented</i> — a colour×word interaction. Either ` +
-      `way a non-semantic property pushes the representation along meaning axes, which is what lets styling bias ` +
-      `a VLM. (The 3-D loop is closed but genuinely ~4–6-D, so you see a partial shadow.) ` +
-      `<span class="prov">Probe: CLIP ViT-L/14-336, 72 hues; “colour only” = filled swatches.</span>`;
+      `<b>The takeaway:</b> the right panel is always <b>pure colour</b> (no word), on the same axis as the ` +
+      `word — compare them. <b>(1) Colour itself carries meaning:</b> a plain green swatch already leans ` +
+      `<i>positive / safe</i>, a red one <i>negative</i>. <b>(2) But colouring a <i>word</i> is more than ` +
+      `adding that colour vector:</b> a word's hue-driven movement overlaps the pure-colour direction by only ` +
+      `~8%, so colour largely <i>reshapes how that specific word is represented</i> — a colour×word interaction. ` +
+      `Either way a non-semantic property pushes the representation along meaning axes, which is what lets ` +
+      `styling bias a VLM. <span class="prov">Probe: CLIP ViT-L/14-336, 72 hues; pure colour = filled swatches.</span>`;
 
     renderAll();
   }
