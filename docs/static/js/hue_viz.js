@@ -2,14 +2,16 @@
    Reads ./static/data/hue_data.json (real CLIP-ViT-L/14-336 measurements). */
 (function () {
   "use strict";
-  const DATA_URL = "./static/data/hue_data.json";
+  const DATA_URL = "./static/data/hue_data.json?v=3";  // bump when hue_data.json changes
   const CURVE_AXES = ["valence", "emotion", "safety", "temperature"];
   // each word's "own" bipolar axis (its meaning vs. its opposite)
   const PRIMARY = { warm: "temperature", cold: "temperature", safe: "safety", dangerous: "safety" };
   const primaryAxis = (w) => PRIMARY[w] || "valence";
 
   const state = { word: "warm", hue: 0, view: "axis" };
+  const rot = { x: -0.45, y: 0.7 };   // 3D rotation for the raw-embedding view
   let DATA, hueHex = {}, axisLabel = {}, axisInfo = {};
+  const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
 
   // theme-aware neutral palette read from CSS variables
   function pal() {
@@ -46,12 +48,13 @@
   }
 
   // ---------------- embedding panel ----------------
-  function renderPlane() { return state.view === "pca" ? renderPca() : renderAxisView(); }
+  function renderPlane() { return state.view === "pca" ? render3D() : renderAxisView(); }
 
   // Default view: a big curve of the word's OWN axis (e.g. cold↔warm) vs. ink
   // hue. Fills the panel; the y-axis poles make "which way is which" explicit.
   function renderAxisView() {
     const svg = d3.select("#planeSvg"); svg.selectAll("*").remove();
+    svg.style("cursor", "default");
     const P = pal();
     const W = 360, H = 300, m = { t: 54, r: 16, b: 30, l: 30 };
     const key = primaryAxis(state.word);
@@ -105,28 +108,52 @@
       .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 2);
   }
 
-  // Secondary view: the raw 768-d embedding reduced to 2D (axes not meaningful)
-  function renderPca() {
+  // Secondary view: the raw 768-d embedding as a rotatable 3-D PCA loop.
+  // PCA(2) only holds ~50% of the path; PCA(3) ~63% and shows it is a
+  // non-planar, closed ring (drag to rotate). Honest > pretty.
+  function render3D() {
     const svg = d3.select("#planeSvg"); svg.selectAll("*").remove();
     const P = pal();
-    const W = 360, H = 300, m = { t: 26, r: 16, b: 28, l: 28 };
+    const W = 360, H = 300, cx = W / 2, cy = H / 2 + 4;
+    svg.style("cursor", "grab");
     const rs = rows();
-    const pad = (a) => { const lo = Math.min(...a), hi = Math.max(...a), p = (hi - lo) * 0.07 || 0.05; return [lo - p, hi + p]; };
-    const x = d3.scaleLinear().domain(pad(rs.map((d) => d.wx))).range([m.l, W - m.r]);
-    const y = d3.scaleLinear().domain(pad(rs.map((d) => d.wy))).range([H - m.b, m.t]);
-    document.getElementById("planeLabel").innerHTML = "Raw embedding &middot; within-word PCA(2)";
-    svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", H - m.b).attr("y2", H - m.b).attr("stroke", P.grid);
-    svg.append("line").attr("x1", m.l).attr("x2", m.l).attr("y1", m.t).attr("y2", H - m.b).attr("stroke", P.grid);
-    svg.append("text").attr("x", (W + m.l - m.r) / 2).attr("y", H - 6).attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis).text("PC1 →");
-    svg.append("text").attr("transform", `translate(11,${(H - m.b + m.t) / 2}) rotate(-90)`).attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis).text("PC2 →");
-    const line = d3.line().x((d) => x(d.wx)).y((d) => y(d.wy));
-    svg.append("path").datum(rs).attr("d", line).attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1.4);
-    svg.selectAll("circle.pt").data(rs).enter().append("circle")
-      .attr("cx", (d) => x(d.wx)).attr("cy", (d) => y(d.wy)).attr("r", 3)
-      .attr("fill", (d) => colorForHue(d.hue)).attr("stroke", P.ring).attr("stroke-width", .6);
+    const mx = mean(rs.map((d) => d.wx)), my = mean(rs.map((d) => d.wy)), mz = mean(rs.map((d) => d.wz || 0));
+    const pts = rs.map((d) => ({ x: d.wx - mx, y: d.wy - my, z: (d.wz || 0) - mz, hue: d.hue }));
+    const maxr = Math.max(...pts.map((p) => Math.hypot(p.x, p.y, p.z))) || 1;
+    const scale = (Math.min(W, H) / 2 - 30) / maxr;
     const cur = rowAt(state.hue);
-    svg.append("circle").attr("cx", x(cur.wx)).attr("cy", y(cur.wy)).attr("r", 8)
+    const curC = { x: cur.wx - mx, y: cur.wy - my, z: (cur.wz || 0) - mz, hue: cur.hue };
+    const vv = (DATA.meta.withinWordPcaVar || {})[state.word] || [];
+    const pct = vv.length >= 3 && vv.every(Number.isFinite)
+      ? Math.round((vv[0] + vv[1] + vv[2]) * 100) : null;
+    document.getElementById("planeLabel").innerHTML = "Raw embedding &middot; PCA(3), drag to rotate";
+
+    const proj = (p) => {
+      const cY = Math.cos(rot.y), sY = Math.sin(rot.y);
+      const x1 = p.x * cY - p.z * sY, z1 = p.x * sY + p.z * cY;
+      const cX = Math.cos(rot.x), sX = Math.sin(rot.x);
+      const y1 = p.y * cX - z1 * sX, z2 = p.y * sX + z1 * cX;
+      return { sx: cx + x1 * scale, sy: cy - y1 * scale, depth: z2 };
+    };
+    const pr = pts.map((p) => ({ ...proj(p), hue: p.hue }));
+    // connecting loop (hue order, closed)
+    svg.append("path").attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1).attr("opacity", .55)
+      .attr("d", d3.line().x((p) => p.sx).y((p) => p.sy)(pr.concat([pr[0]])));
+    // depth-sorted hue dots (far & dim first)
+    const ds = pr.map((d) => d.depth), dmin = Math.min(...ds), dmax = Math.max(...ds);
+    const dep = (d) => (dmax === dmin ? 0.5 : (d.depth - dmin) / (dmax - dmin));
+    svg.selectAll("circle.p3").data([...pr].sort((a, b) => a.depth - b.depth)).enter().append("circle")
+      .attr("cx", (d) => d.sx).attr("cy", (d) => d.sy).attr("r", (d) => 2 + 2 * dep(d))
+      .attr("fill", (d) => colorForHue(d.hue)).attr("opacity", (d) => 0.45 + 0.55 * dep(d))
+      .attr("stroke", P.ring).attr("stroke-width", .4);
+    // current marker
+    const pc = proj(curC);
+    svg.append("circle").attr("cx", pc.sx).attr("cy", pc.sy).attr("r", 8)
       .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 2);
+    // hint
+    svg.append("text").attr("x", W - 8).attr("y", H - 8).attr("text-anchor", "end")
+      .attr("class", "ax").attr("fill", P.axis).attr("font-size", "9px")
+      .text("drag to rotate" + (pct != null ? " · PC1–3 ≈ " + pct + "% of variance" : ""));
   }
 
   // ---------------- right panel (stacked, full-width), view-aware ----------------
@@ -141,6 +168,7 @@
       series = [
         { name: "PC1", val: (d) => d.wx, pos: "", neg: "" },
         { name: "PC2", val: (d) => d.wy, pos: "", neg: "" },
+        { name: "PC3", val: (d) => d.wz || 0, pos: "", neg: "" },
       ];
     } else {
       label = "The other semantic axes vs. ink hue";
@@ -222,6 +250,11 @@
     document.getElementById("hueSlider").addEventListener("input", (e) => {
       state.hue = +e.target.value; renderAll();
     });
+    // drag to rotate the 3-D raw-embedding view
+    d3.select("#planeSvg").call(d3.drag().on("drag", (e) => {
+      if (state.view !== "pca") return;
+      rot.y += e.dx * 0.012; rot.x += e.dy * 0.012; render3D();
+    }));
     document.querySelectorAll("#viewToggle button").forEach((b) => {
       b.addEventListener("click", () => {
         state.view = b.dataset.view;
@@ -234,9 +267,10 @@
       `<b>The takeaway:</b> the curves bend <i>smoothly and systematically</i> with hue — a purely visual ` +
       `property (ink colour) is mapped onto <i>meaning</i> axes the text never invoked, and that entanglement ` +
       `is what lets recolouring a word steer a VLM's judgement. The <b>Raw embedding (PCA)</b> loop is closed ` +
-      `(hue 0° rejoins 360°) and is a property of the whole 768-d embedding; it isn't a clean circle because ` +
-      `the real path is ~4–6-dimensional (you are seeing a flattened 2-D shadow) and hue itself is ` +
-      `perceptually non-uniform. <span class="prov">Probe: CLIP ViT-L/14-336, single-word renders, 72 hues.</span>`;
+      `(hue 0° rejoins 360°, cosine 0.99) and is a property of the whole 768-d embedding. It isn't a clean ` +
+      `circle: the path is genuinely ~4–6-dimensional, so even the rotatable 3-D view captures only ~⅔ of it ` +
+      `— and hue itself is perceptually non-uniform (the loop crawls near red, races near cyan). ` +
+      `<span class="prov">Probe: CLIP ViT-L/14-336, single-word renders, 72 hues.</span>`;
 
     renderAll();
   }
