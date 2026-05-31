@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A Platonic — and Umwelt — reading · Color Bias in VLMs</title>
-  <meta name="description" content="An interpretive companion to 'Seeing Red, Thinking Bad': reading colour bias in vision language models through the debate on representational convergence (Platonic, Aristotelian, and Umwelt hypotheses).">
-  <meta property="og:title" content="A Platonic — and Umwelt — reading of colour bias in VLMs">
+  <meta name="description" content="An interpretive companion to 'Seeing Red, Thinking Bad': reading color bias in vision language models through the debate on representational convergence (Platonic, Aristotelian, and Umwelt hypotheses).">
+  <meta property="og:title" content="A Platonic — and Umwelt — reading of color bias in VLMs">
   <meta property="og:description" content="Why does an inert surface feature move a semantic judgment? A reading through representational-convergence theory.">
   <meta property="og:image" content="../static/images/teaser_concept.png">
   <meta property="og:type" content="article">
@@ -61,8 +61,8 @@
 <header class="art-head">
   <div class="container">
     <div class="art-kicker">Interpretive companion · Blog</div>
-    <h1 class="art-title">A Platonic — and Umwelt — reading of colour bias</h1>
-    <p class="art-sub">Why should an inert surface feature — text colour — move a vision language model's
+    <h1 class="art-title">A Platonic — and Umwelt — reading of color bias</h1>
+    <p class="art-sub">Why should an inert surface feature — text color — move a vision language model's
       semantic judgment? A reading of our results through the debate on representational convergence.</p>
     <div class="art-links">
       <a href="../index.html"><span class="icon"><i class="fas fa-arrow-left"></i></span><span>Project page</span></a>
@@ -88,22 +88,22 @@
     </ol>
   </nav>
 
-  <p class="pull">The word never changes — only its text colour. Yet a vision encoder places it somewhere
+  <p class="pull">The word never changes — only its text color. Yet a vision encoder places it somewhere
     new in concept space. What does that tell us about the "shared reality" these models are supposed to converge on?</p>
 
   <h2 id="q">1 · The question</h2>
-  <p>In <a href="../index.html">Seeing Red, Thinking Bad</a> we render a sentence as an image and recolour a
+  <p>In <a href="../index.html">Seeing Red, Thinking Bad</a> we render a sentence as an image and recolor a
     word — say, turning <i>excellent</i> green — without touching a single character. The string is identical;
     only the visual styling differs. Yet vision language models shift their sentiment judgment, and a CLIP
     probe shows that sweeping a rendered word's <i>hue</i> moves its image embedding along human-interpretable
-    semantic axes (valence, safety, emotion). Colour, which carries no propositional meaning here, behaves like
+    semantic axes (valence, safety, emotion). Color, which carries no propositional meaning here, behaves like
     evidence.</p>
   <p>That raises a question bigger than one model's quirk: if independently trained encoders are supposed to be
     converging on a shared, abstract picture of the world, why does a semantically inert surface feature
     intrude on it? Below we read our finding through the active debate on <b>representational convergence</b>.</p>
 
   <figure>
-    <img src="../static/images/teaser_concept.png" alt="Recolouring a word shifts its valence projection in CLIP">
+    <img src="../static/images/teaser_concept.png" alt="Recoloring a word shifts its valence projection in CLIP">
     <figcaption>The same token <span class="mono">"terrible"</span> in black vs. green text lands at a different
       valence projection — red is most negative, green nudges it toward positive — even though the string is
       unchanged. (Real CLIP-ViT-L/14-336 measurements at the probe rendering.)</figcaption>
@@ -115,9 +115,9 @@
     proposes that large models trained on different data, objectives, and modalities are converging toward a
     shared statistical model of reality — different shadows on the wall of Plato's cave that nonetheless point
     back at the same object. On this view a clean "concept space" exists, and a word like <i>terrible</i> ought
-    to sit at a fixed semantic location regardless of its colour.</p>
+    to sit at a fixed semantic location regardless of its color.</p>
   <p>Our result is then naturally read as a <b>failure mode</b> of that convergence: a feature that should be
-    semantically inert (text colour) leaks into the shared space and biases judgment. The shadow gets repainted,
+    semantically inert (text color) leaks into the shared space and biases judgment. The shadow gets repainted,
     and the model mistakes the new shadow for a different object.</p>
 
   <h2 id="partial">3 · Convergence is partial, local, and contested</h2>
@@ -143,11 +143,11 @@
   <p>Our probe is consistent with that messy picture, and we are careful to report it as a measurement
     <i>within CLIP's embedding space</i>, read directionally rather than as a universal magnitude (global
     geometric quantities can be scale-confounded; Gröger et al.).</p>
-  <p>Three observations. <b>(1) Colour itself carries valence.</b> A plain colour swatch with no word at all
-    already projects more "positive / safe" when green than when red — so the encoder reads colour as meaning.
-    <b>(2) But colouring a word is not just adding that colour vector.</b> A word's hue-driven movement overlaps
-    the pure-colour direction by only about 8%; colour largely <i>reshapes how that specific word is
-    represented</i> — a colour × word interaction. <b>(3) The hue trajectory is a closed but tangled loop.</b>
+  <p>Three observations. <b>(1) Color itself carries valence.</b> A plain color swatch with no word at all
+    already projects more "positive / safe" when green than when red — so the encoder reads color as meaning.
+    <b>(2) But coloring a word is not just adding that color vector.</b> A word's hue-driven movement overlaps
+    the pure-color direction by only about 8%; color largely <i>reshapes how that specific word is
+    represented</i> — a color × word interaction. <b>(3) The hue trajectory is a closed but tangled loop.</b>
     Sweeping hue 0→360° traces a path that returns to its start (cosine ≈ 0.99) yet is genuinely ~4–6
     dimensional and non-circular — the kind of structure you would expect of a coarsely-shared space, not a
     clean circle. You can explore all of this in the
@@ -159,10 +159,10 @@
     (<a href="https://arxiv.org/abs/2604.17960" target="_blank" rel="noopener">Bosch, Sommers, Doerig &amp; Kietzmann, 2026</a>)
     argues that representational alignment reflects <i>overlapping ecological constraints</i> — environment,
     sensory apparatus, training statistics, objectives — rather than recovery of one global optimum, and it
-    cites cross-cultural colour perception as evidence against universality. On this view CLIP's
-    colour → valence coupling is not a deviation from a Platonic ideal at all, but a faithful imprint of its
-    human-centric training Umwelt, in which colour already carries learned affective and cultural meaning.</p>
-  <p>So the two readings meet at the same place. Under the Platonic lens, colour leakage is a bug in a
+    cites cross-cultural color perception as evidence against universality. On this view CLIP's
+    color → valence coupling is not a deviation from a Platonic ideal at all, but a faithful imprint of its
+    human-centric training Umwelt, in which color already carries learned affective and cultural meaning.</p>
+  <p>So the two readings meet at the same place. Under the Platonic lens, color leakage is a bug in a
     convergence that was meant to be clean; under the Umwelt lens, it is a feature of a representation shaped by
     a particular niche. Either way, a non-semantic property is moving semantic judgment.</p>
 
@@ -177,9 +177,9 @@
     standing in for "a converged representation," not the universal Platonic form. The ~8% overlap and the
     ~4–6-dimensional loop are <i>our own</i> measurements within CLIP's embedding space, read directionally.
     "Green → positive" is a learned, culturally contingent association we <i>measure</i>, not an innate ideal.
-    Crucially, <b>none of the four convergence papers studies colour</b>: we cite them for the
+    Crucially, <b>none of the four convergence papers studies color</b>: we cite them for the
     convergence-measurement caveat and the local / partial / niche-specific reframing of the Platonic
-    hypothesis, not as evidence for colour leakage itself. This page is an interpretive companion; the
+    hypothesis, not as evidence for color leakage itself. This page is an interpretive companion; the
     empirical claims live in the paper. <em>(Version 0.1 — to be expanded.)</em></p>
 
   <h2 id="refs">References</h2>

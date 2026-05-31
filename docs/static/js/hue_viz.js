@@ -2,7 +2,7 @@
    Reads ./static/data/hue_data.json (real CLIP-ViT-L/14-336 measurements). */
 (function () {
   "use strict";
-  const DATA_URL = "./static/data/hue_data.json?v=4";  // bump when hue_data.json changes
+  const DATA_URL = "./static/data/hue_data.json?v=5";  // bump when hue_data.json changes
   const CURVE_AXES = ["valence", "emotion", "safety", "temperature"];
   // each word's "own" bipolar axis (its meaning vs. its opposite)
   const PRIMARY = { warm: "temperature", cold: "temperature", safe: "safety", dangerous: "safety" };
@@ -10,9 +10,9 @@
 
   const state = { word: "warm", hue: 0, view: "axis" };
   const rot = { x: -0.45, y: 0.7 };   // 3D rotation for the raw-embedding view
-  let DATA, hueHex = {}, axisLabel = {}, axisInfo = {}, COLOR_ONLY = "(colour only)";
+  let DATA, hueHex = {}, axisLabel = {}, axisInfo = {}, COLOR_ONLY = "(color only)";
   const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
-  const dispName = (w) => (w === COLOR_ONLY ? "pure colour" : w);
+  const dispName = (w) => (w === COLOR_ONLY ? "pure color" : w);
 
   // theme-aware neutral palette read from CSS variables
   function pal() {
@@ -43,7 +43,7 @@
     const hex = colorForHue(state.hue);
     const w = document.getElementById("stimulusWord");
     const canvas = document.querySelector(".stimulus-canvas");
-    if (state.word === COLOR_ONLY) {           // pure colour: show a filled swatch, no text
+    if (state.word === COLOR_ONLY) {           // pure color: show a filled swatch, no text
       w.textContent = ""; if (canvas) canvas.style.background = hex;
     } else {
       w.textContent = state.word; w.style.color = hex; if (canvas) canvas.style.background = "#fff";
@@ -54,8 +54,8 @@
   }
 
   // ============ panels ============
-  // Middle = the selected word; Right = pure colour (no word), SAME view, so
-  // you compare "word in colour" vs "colour alone" side by side.
+  // Middle = the selected word; Right = pure color (no word), SAME view, so
+  // you compare "word in color" vs "color alone" side by side.
 
   // Antonym-axis big curve of `rs` on bipolar axis `key`, titled by `name`.
   function renderAxis(svgSel, rs, key, name, labelId, labelHtml) {
@@ -145,18 +145,18 @@
       .text("drag to rotate" + (pct != null ? " · PC1–3 ≈ " + pct + "%" : ""));
   }
 
-  // render both panels: middle = word, right = pure colour, same view & axis
+  // render both panels: middle = word, right = pure color, same view & axis
   function renderViews() {
     const wordRows = rows();
     const colorRows = DATA.data[COLOR_ONLY] || wordRows;
     if (state.view === "pca") {
       render3D("#planeSvg", wordRows, state.word, "planeLabel", `“${dispName(state.word)}” &middot; raw embedding (3-D)`);
-      render3D("#curvesSvg", colorRows, COLOR_ONLY, "curvesLabel", "Pure colour &middot; raw embedding (3-D)");
+      render3D("#curvesSvg", colorRows, COLOR_ONLY, "curvesLabel", "Pure color &middot; raw embedding (3-D)");
     } else {
       const key = primaryAxis(state.word);
       const info = axisInfo[key] || { pos: key, neg: "?" };
       renderAxis("#planeSvg", wordRows, key, dispName(state.word), "planeLabel", `“${dispName(state.word)}” &middot; ${info.neg} ↔ ${info.pos}`);
-      renderAxis("#curvesSvg", colorRows, key, "pure colour", "curvesLabel", `Pure colour &middot; ${info.neg} ↔ ${info.pos}`);
+      renderAxis("#curvesSvg", colorRows, key, "pure color", "curvesLabel", `Pure color &middot; ${info.neg} ↔ ${info.pos}`);
     }
   }
 
@@ -203,13 +203,13 @@
     });
 
     document.getElementById("vizNote").innerHTML =
-      `<b>The takeaway:</b> the right panel is always <b>pure colour</b> (no word), on the same axis as the ` +
-      `word — compare them. <b>(1) Colour itself carries meaning:</b> a plain green swatch already leans ` +
-      `<i>positive / safe</i>, a red one <i>negative</i>. <b>(2) But colouring a <i>word</i> is more than ` +
-      `adding that colour vector:</b> a word's hue-driven movement overlaps the pure-colour direction by only ` +
-      `~8%, so colour largely <i>reshapes how that specific word is represented</i> — a colour×word interaction. ` +
+      `<b>The takeaway:</b> the right panel is always <b>pure color</b> (no word), on the same axis as the ` +
+      `word — compare them. <b>(1) Color itself carries meaning:</b> a plain green swatch already leans ` +
+      `<i>positive / safe</i>, a red one <i>negative</i>. <b>(2) But coloring a <i>word</i> is more than ` +
+      `adding that color vector:</b> a word's hue-driven movement overlaps the pure-color direction by only ` +
+      `~8%, so color largely <i>reshapes how that specific word is represented</i> — a color×word interaction. ` +
       `Either way a non-semantic property pushes the representation along meaning axes, which is what lets ` +
-      `styling bias a VLM. <span class="prov">Probe: CLIP ViT-L/14-336, 72 hues; pure colour = filled swatches.</span>`;
+      `styling bias a VLM. <span class="prov">Probe: CLIP ViT-L/14-336, 72 hues; pure color = filled swatches.</span>`;
 
     renderAll();
   }
