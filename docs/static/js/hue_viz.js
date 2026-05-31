@@ -253,7 +253,7 @@
     // drag to rotate the 3-D raw-embedding view
     d3.select("#planeSvg").call(d3.drag().on("drag", (e) => {
       if (state.view !== "pca") return;
-      rot.y += e.dx * 0.012; rot.x += e.dy * 0.012; render3D();
+      rot.y -= e.dx * 0.012; rot.x += e.dy * 0.012; render3D();
     }));
     document.querySelectorAll("#viewToggle button").forEach((b) => {
       b.addEventListener("click", () => {
