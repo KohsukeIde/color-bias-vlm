@@ -187,16 +187,48 @@
     </figure>
     <p class="body-text mt">
       We read this through the lens of the <b>Platonic Representation Hypothesis</b>
-      (<a href="https://phillipi.github.io/prh/" target="_blank" rel="noopener">Huh et&nbsp;al., 2024</a>):
-      large models pull disparate sensory inputs toward shared, abstract concepts. Stealth Visual Prompts
-      expose the <i>failure mode</i> of that convergence — a surface feature that should be semantically inert
-      (ink color) leaks into the same concept space as meaning, biasing judgment.
+      (<a href="https://phillipi.github.io/prh/" target="_blank" rel="noopener">Huh&nbsp;et&nbsp;al., 2024</a>):
+      large models pull disparate sensory inputs toward shared, abstract concepts. We invoke it as an
+      <i>analytical lens</i>, not as settled fact &mdash; its strong, global form is actively contested. Recent work
+      argues that much apparent cross-model convergence under global metrics (e.g.&nbsp;CKA) is a scale-induced
+      artifact, and that what survives rigorous null-calibration is agreement on <i>local</i> neighborhood structure
+      rather than a single shared geometry
+      (<a href="https://arxiv.org/abs/2602.14486" target="_blank" rel="noopener">Gr&ouml;ger et&nbsp;al., 2026</a>);
+      that cross-modal alignment is fragile at scale and leaves only <i>coarse</i> semantic overlap, with models
+      inhabiting modality-specific &ldquo;Umwelten&rdquo;
+      (<a href="https://arxiv.org/abs/2604.18572" target="_blank" rel="noopener">Koepke et&nbsp;al., 2026</a>);
+      and that convergence, where real, lives only in well-chosen <i>low-dimensional subspaces</i> that can entangle
+      conceptually distinct axes
+      (<a href="https://arxiv.org/abs/2503.05283" target="_blank" rel="noopener">Hadgi et&nbsp;al., 2025</a>).
+      On every count the shared space is partial, local, and imperfect &mdash; and that is exactly the kind of space
+      into which a surface feature can intrude. Stealth Visual Prompts expose this <i>failure mode</i>: ink color,
+      which should be semantically inert, moves a word&rsquo;s position along CLIP&rsquo;s valence direction. In our own
+      probe this color&nbsp;&times;&nbsp;word <i>interaction</i> overlaps the pure-color direction by only ~8% and traces
+      a roughly 4&ndash;6&nbsp;dimensional, non-circular loop &mdash; messy, fine-grained mis-structure that is consistent
+      with a coarsely-shared space rather than a clean Platonic form.
+    </p>
+    <p class="body-text">
+      A complementary reading makes the effect <i>predicted</i> rather than merely anomalous. The
+      <b>Umwelt Representation Hypothesis</b>
+      (<a href="https://arxiv.org/abs/2604.17960" target="_blank" rel="noopener">Bosch et&nbsp;al., 2026</a>)
+      argues alignment reflects overlapping <i>ecological constraints</i> &mdash; environment, sensory apparatus,
+      training statistics &mdash; not recovery of one global optimum, and cites cross-cultural color perception as
+      evidence against universality. On this view CLIP&rsquo;s color&nbsp;&rarr;&nbsp;valence coupling is not a deviation
+      from a Platonic ideal but a faithful imprint of its human-centric training Umwelt, in which color carries learned
+      affective meaning. Whichever frame one prefers, the practical upshot is the same: a vulnerability in which surface
+      appearance moves semantic judgment.
     </p>
     <p class="caveat">
       <i class="fas fa-circle-info"></i>&nbsp; We use this as an interpretive lens, not a proof. CLIP is a
-      <b>diagnostic</b> encoder standing in for "a converged representation," not the universal Platonic form;
-      "green&nbsp;→&nbsp;positive" is a learned, culturally contingent association we <i>measure</i>, not an
-      innate ideal. Our contribution is the resulting reliability/safety vulnerability.
+      <b>diagnostic</b> encoder standing in for &ldquo;a converged representation,&rdquo; not the universal Platonic
+      form. The ~4&ndash;6D hue loop and ~8% overlap are <i>our own</i> measurements <i>within CLIP&rsquo;s embedding
+      space</i>; because absolute geometric magnitudes in such spaces can be confounded (e.g.&nbsp;by model scale;
+      <a href="https://arxiv.org/abs/2602.14486" target="_blank" rel="noopener">Gr&ouml;ger et&nbsp;al., 2026</a>), we
+      read them as directional, within-encoder observations rather than universal magnitudes.
+      &ldquo;Green&nbsp;&rarr;&nbsp;positive&rdquo; is a learned, culturally contingent association we <i>measure</i>, not
+      an innate ideal. None of these works studies color; we cite them for the convergence-measurement caveat and the
+      local&nbsp;/&nbsp;partial&nbsp;/&nbsp;niche-specific reframing of PRH. Our contribution is the resulting
+      reliability/safety vulnerability.
     </p>
   </div>
 </section>
