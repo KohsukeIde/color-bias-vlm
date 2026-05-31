@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seeing Red, Thinking Bad: Color Bias in Vision Language Models</title>
+  <meta name="description" content="Stealth Visual Prompts: subtle color and contrast styling of rendered text systematically biases vision language models. ICPR 2026.">
+  <meta property="og:title" content="Seeing Red, Thinking Bad: Color Bias in Vision Language Models">
+  <meta property="og:description" content="Recoloring a word shifts a VLM's judgment — explore an interactive hue sweep of CLIP embeddings.">
+  <meta property="og:image" content="./static/images/fig1-v4.png">
+  <meta property="og:type" content="website">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/index.css">
+</head>
+<body>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero-head">
+  <div class="container">
+    <span class="venue-badge">ICPR&nbsp;2026</span>
+    <h1 class="paper-title">Seeing Red, Thinking Bad:<br>Color Bias in Vision Language Models</h1>
+
+    <p class="authors">
+      <a href="mailto:ide.agi@aist.go.jp">Kohsuke Ide</a><sup>1,2</sup>,
+      Ryousuke Yamada<sup>1,3</sup>,
+      Yoshihiro Fukuhara<sup>1</sup>,
+      Hirokatsu Kataoka<sup>1,4</sup>,
+      Yutaka Satoh<sup>1,2</sup>
+    </p>
+    <p class="affil">
+      <sup>1</sup>National Institute of Advanced Industrial Science and Technology (AIST) &nbsp;·&nbsp;
+      <sup>2</sup>University of Tsukuba &nbsp;·&nbsp;
+      <sup>3</sup>University of Technology Nuremberg &nbsp;·&nbsp;
+      <sup>4</sup>University of Oxford
+    </p>
+
+    <div class="link-buttons">
+      <!-- TODO: replace href with the hosted paper / arXiv URL when available -->
+      <a class="lbtn" href="https://github.com/KohsukeIde/color-bias-vlm" target="_blank" rel="noopener">
+        <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper</span></a>
+      <a class="lbtn" href="https://github.com/KohsukeIde/color-bias-vlm" target="_blank" rel="noopener">
+        <span class="icon"><i class="fab fa-github"></i></span><span>Code</span></a>
+      <a class="lbtn" href="#bibtex">
+        <span class="icon"><i class="fas fa-quote-left"></i></span><span>BibTeX</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TEASER (fig1) ===================== -->
+<section class="section teaser-sec">
+  <div class="container narrow">
+    <figure>
+      <img src="./static/images/fig1-v4.png" alt="Concept: subtle visual styling biases VLM outputs">
+      <figcaption>
+        <b>Subtle visual styling biases VLM outputs.</b> Identical text content produces different
+        sentiment classifications when positive words are colored green — VLMs can treat ordinary
+        formatting as an effective <i>stealth visual prompt</i>, even though humans regard it as
+        non-instructive decoration.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== ABSTRACT ===================== -->
+<section class="section">
+  <div class="container narrow">
+    <h2 class="title is-4 sec-title">Abstract</h2>
+    <p class="body-text">
+      Vision language models (VLMs) are increasingly used in industrial decision-making systems.
+      We study how VLMs interpret <i>text rendered as an image</i> and investigate the influence of visual
+      styling biases. We introduce <b>Stealth Visual Prompts</b>, which subtly change the visual styling of
+      text — such as color and contrast — while preserving semantic content, and use them to systematically
+      measure their impact on VLM analysis. We observe that coloring positive words green consistently shifts
+      sentiment predictions toward positive, so that VLMs often fail to properly account for negative words;
+      this behavior correlates with changes in the latent representations of the vision encoder induced by
+      color variation. We further show that reducing text–background contrast increases reliance on visually
+      salient cues and leads to more incorrect Visual Question Answering (VQA) outputs. Ordinary visual
+      styling of rendered text can guide VLMs' interpretation in ways that diverge from human semantic
+      understanding.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== STEALTH VISUAL PROMPTS ===================== -->
+<section class="section alt">
+  <div class="container narrow">
+    <h2 class="title is-4 sec-title">Stealth Visual Prompts</h2>
+    <p class="body-text">
+      A <b>Stealth Visual Prompt</b> is a controlled perturbation of the visual rendering of text while the
+      underlying string is held fixed. We focus on two complementary, ubiquitous attributes:
+    </p>
+    <div class="columns chips">
+      <div class="column"><div class="chip-card"><h3>Color</h3>
+        Recolors a subset of words using six canonical hues (red, green, blue, yellow, cyan, magenta) at
+        three intensity levels. Color can encode learned semantic associations.</div></div>
+      <div class="column"><div class="chip-card"><h3>Contrast</h3>
+        Reduces text–background contrast (low-contrast grayscale), optionally with one high-contrast
+        <i>salient</i> span. Contrast directly modulates perceptual accessibility.</div></div>
+    </div>
+    <figure class="mt">
+      <img src="./static/images/stimuli_examples_v2.png" alt="Examples of generated stimuli">
+      <figcaption>Generated stimuli. (a) Mixed-sentiment text (Color axis). (b) Structurally separated long
+        text. (c) Saliency Competition (Contrast axis): an incorrect decoy is made visually salient.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== INTERACTIVE ===================== -->
+<section class="section explore-sec" id="explore">
+  <div class="container">
+    <h2 class="title is-4 sec-title centered">Sweep the hue, watch the meaning move</h2>
+    <p class="body-text centered narrow-c">
+      The word string never changes — only its ink hue. Yet a CLIP vision encoder places the recolored word
+      at a different location in concept space. Drag the slider to sweep the hue and watch the embedding and
+      its semantic-axis projections respond, live, from <b>real measured data</b>
+      (CLIP&nbsp;ViT-L/14-336, 72 hues per word).
+    </p>
+
+    <div class="viz-shell">
+      <div class="viz-controls">
+        <div class="ctrl">
+          <label for="wordSelect">Word</label>
+          <div class="select is-small"><select id="wordSelect"></select></div>
+        </div>
+        <div class="ctrl grow">
+          <label for="hueSlider">Ink hue <span id="hueVal" class="mono"></span></label>
+          <input type="range" id="hueSlider" min="0" max="355" step="5" value="0">
+        </div>
+        <div class="ctrl">
+          <label>Embedding view</label>
+          <div class="buttons has-addons" id="viewToggle">
+            <button class="button is-small is-active" data-view="semantic">Semantic plane</button>
+            <button class="button is-small" data-view="pca">CLIP PCA</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="viz-grid">
+        <div class="viz-card stimulus-card">
+          <div class="card-label">Rendered stimulus</div>
+          <div id="stimulusWord" class="stimulus-word">terrible</div>
+          <div class="swatch-row"><span id="swatch" class="swatch"></span>
+            <span id="swatchHex" class="mono small"></span></div>
+        </div>
+        <div class="viz-card">
+          <div class="card-label" id="planeLabel">Semantic plane &middot; valence × emotion</div>
+          <svg id="planeSvg" viewBox="0 0 360 300" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div class="viz-card">
+          <div class="card-label">Semantic-axis projections vs. hue</div>
+          <svg id="curvesSvg" viewBox="0 0 360 300" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+      </div>
+      <p class="viz-note" id="vizNote"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PLATONIC READING ===================== -->
+<section class="section">
+  <div class="container narrow">
+    <h2 class="title is-4 sec-title">A Platonic reading</h2>
+    <figure>
+      <img src="./static/images/teaser_concept.png" alt="A biased shadow on the wall: recoloring shifts valence">
+      <figcaption>The same token <span class="mono">"terrible"</span> in black vs. green ink is encoded with a
+        different valence projection — red ink is most negative, green nudges it toward positive — even though
+        the string is unchanged. Values are real CLIP measurements at the probe rendering.</figcaption>
+    </figure>
+    <p class="body-text mt">
+      We read this through the lens of the <b>Platonic Representation Hypothesis</b>
+      (<a href="https://phillipi.github.io/prh/" target="_blank" rel="noopener">Huh et&nbsp;al., 2024</a>):
+      large models pull disparate sensory inputs toward shared, abstract concepts. Stealth Visual Prompts
+      expose the <i>failure mode</i> of that convergence — a surface feature that should be semantically inert
+      (ink color) leaks into the same concept space as meaning, biasing judgment.
+    </p>
+    <p class="caveat">
+      <i class="fas fa-circle-info"></i>&nbsp; We use this as an interpretive lens, not a proof. CLIP is a
+      <b>diagnostic</b> encoder standing in for "a converged representation," not the universal Platonic form;
+      "green&nbsp;→&nbsp;positive" is a learned, culturally contingent association we <i>measure</i>, not an
+      innate ideal. Our contribution is the resulting reliability/safety vulnerability.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== FINDINGS ===================== -->
+<section class="section alt">
+  <div class="container narrow">
+    <h2 class="title is-4 sec-title">Key findings</h2>
+
+    <h3 class="finding-h">1 · Color prompts induce systematic sentiment biases</h3>
+    <p class="body-text">Recoloring sentiment-bearing words shifts predicted polarity relative to an
+      all-black baseline. Susceptibility differs sharply across models.</p>
+    <div class="table-wrap">
+      <table class="table is-fullwidth is-narrow result-table">
+        <thead><tr><th>Model</th><th>Max Pos. ↑</th><th>Max Neg. ↓</th><th>Range</th></tr></thead>
+        <tbody>
+          <tr><td>IDEFICS2-8B</td><td>+0.160</td><td>−0.360</td><td>0.520</td></tr>
+          <tr><td>LLaVA-Mistral-7B</td><td>+0.030</td><td>−0.010</td><td>0.040</td></tr>
+          <tr><td>LLaVA-Vicuna-7B</td><td>+0.060</td><td>−0.060</td><td>0.120</td></tr>
+          <tr class="hl"><td>Qwen2-VL-7B</td><td>+0.420</td><td>−0.480</td><td>0.900</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure class="mt"><img src="./static/images/sentimental_short.png" alt="Short-sentence sentiment bias">
+      <figcaption>Short-sentence Sentiment Set: average sentiment bias vs. baseline for four VLMs.</figcaption>
+    </figure>
+
+    <h3 class="finding-h">2 · Hue shifts vision-encoder semantic projections</h3>
+    <p class="body-text">Sweeping a rendered word's hue moves its CLIP image embedding along human-interpretable
+      semantic axes (valence, emotion) — the representation-level correlate of the behavioral bias.</p>
+    <figure><img src="./static/images/a2_hue_tuning_curves_v2.png" alt="CLIP hue tuning curves">
+      <figcaption>CLIP representation probe: hue-dependent semantic projections of six probe words on four axes.</figcaption>
+    </figure>
+
+    <h3 class="finding-h">3 · Contrast prompts increase saliency-driven VQA errors</h3>
+    <p class="body-text">As the non-salient context becomes harder to read, several models increasingly copy a
+      visually salient but incorrect decoy. We report the <b>Induced Error Rate</b> (fraction of predictions
+      containing the decoy).</p>
+    <div class="table-wrap">
+      <table class="table is-fullwidth is-narrow result-table">
+        <thead><tr><th>Model</th><th>g=1</th><th>g=16</th><th>g=64</th><th>g=128</th><th>g=192</th><th>g=240</th></tr></thead>
+        <tbody>
+          <tr><td>IDEFICS2-8B</td><td>24%</td><td>23%</td><td>24%</td><td>27%</td><td>32%</td><td><b>36%</b></td></tr>
+          <tr><td>LLaVA-Mistral-7B</td><td>27%</td><td>25%</td><td>26%</td><td>24%</td><td>24%</td><td>27%</td></tr>
+          <tr><td>LLaVA-Vicuna-7B</td><td>19%</td><td>19%</td><td>20%</td><td>20%</td><td>22%</td><td>25%</td></tr>
+          <tr class="hl"><td>Qwen2-VL-7B</td><td>4%</td><td>4%</td><td>4%</td><td>4%</td><td>5%</td><td>6%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="columns mt">
+      <div class="column"><figure><img src="./static/images/figure4b_saliency_induced_errors.png" alt="IER vs contrast">
+        <figcaption>Induced Error Rate vs. grayscale level of the non-salient context (higher ⇒ lower contrast).</figcaption></figure></div>
+      <div class="column"><figure><img src="./static/images/a3_min.png" alt="Readability transition">
+        <figcaption>A model-dependent <i>readability transition</i> from a minimal VLM-based OCR proxy.</figcaption></figure></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== WHY IT MATTERS ===================== -->
+<section class="section">
+  <div class="container narrow">
+    <h2 class="title is-4 sec-title">Why it matters</h2>
+    <p class="body-text">
+      These sensitivities imply a reliability and safety risk for VLM pipelines that ingest documents or UI
+      screenshots: <b>benign or adversarial styling can steer model decisions without changing the underlying
+      text.</b> Practical safeguards include normalizing rendered text before inference, cross-checking
+      image-based answers with OCR-extracted text, and adding style-invariance checks to evaluation suites.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== BIBTEX ===================== -->
+<section class="section alt" id="bibtex">
+  <div class="container narrow">
+    <h2 class="title is-4 sec-title">BibTeX</h2>
+<pre class="bibtex">@inproceedings{ide2026seeingred,
+  title     = {Seeing Red, Thinking Bad: Color Bias in Vision Language Models},
+  author    = {Ide, Kohsuke and Yamada, Ryousuke and Fukuhara, Yoshihiro
+               and Kataoka, Hirokatsu and Satoh, Yutaka},
+  booktitle = {Proceedings of the International Conference on Pattern Recognition (ICPR)},
+  year      = {2026}
+}</pre>
+  </div>
+</section>
+
+<footer class="footer-mini">
+  <div class="container">
+    <p>Supported by the AIST policy-based budget project "R&amp;D on Generative AI Foundation Models for the
+      Physical Domain". Computation used ABCI 3.0.</p>
+    <p class="dim">Page built with Bulma &amp; D3. Interactive figure uses real CLIP-ViT-L/14-336 measurements.
+      Template aesthetic after the Nerfies academic project page.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="./static/js/hue_viz.js"></script>
+</body>
+</html>
