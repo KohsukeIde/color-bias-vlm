@@ -129,19 +129,35 @@
       .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 2);
   }
 
-  // ---------------- other axes (stacked, full-width) ----------------
+  // ---------------- right panel (stacked, full-width), view-aware ----------------
+  // axis view -> the OTHER semantic axes; pca view -> the loop unrolled (PC1,PC2 vs hue)
   function renderCurves() {
     const svg = d3.select("#curvesSvg"); svg.selectAll("*").remove();
     const P = pal();
-    const W = 360, H = 300, top = 14, mL = 60, mR = 12, rowGap = 18, bottom = 24;
-    const pk = primaryAxis(state.word);
-    const axes = CURVE_AXES.filter((a) => a !== pk);          // the 3 other axes
-    const rh = (H - top - rowGap * (axes.length - 1) - bottom) / axes.length;
     const rs = rows(), cur = rowAt(state.hue);
-    axes.forEach((axis, i) => {
+    let series, label;
+    if (state.view === "pca") {
+      label = "The loop, unrolled: each PCA coordinate vs. ink hue";
+      series = [
+        { name: "PC1", val: (d) => d.wx, pos: "", neg: "" },
+        { name: "PC2", val: (d) => d.wy, pos: "", neg: "" },
+      ];
+    } else {
+      label = "The other semantic axes vs. ink hue";
+      const pk = primaryAxis(state.word);
+      series = CURVE_AXES.filter((a) => a !== pk).map((a) => {
+        const info = axisInfo[a] || { pos: a, neg: "" };
+        return { name: axisLabel[a] || a, val: (d) => d.proj[a], pos: info.pos, neg: info.neg };
+      });
+    }
+    const cl = document.getElementById("curvesLabel"); if (cl) cl.textContent = label;
+
+    const W = 360, H = 300, top = 14, mL = 60, mR = 12, rowGap = 18, bottom = 24;
+    const n = series.length;
+    const rh = (H - top - rowGap * (n - 1) - bottom) / n;
+    series.forEach((s, i) => {
       const oy = top + i * (rh + rowGap);
-      const info = axisInfo[axis] || { pos: axis, neg: "" };
-      const vals = rs.map((d) => d.proj[axis]);
+      const vals = rs.map(s.val);
       const lo = Math.min(...vals), hi = Math.max(...vals), p = (hi - lo) * 0.18 || 0.02;
       const x = d3.scaleLinear().domain([0, 360]).range([mL, W - mR]);
       const y = d3.scaleLinear().domain([lo - p, hi + p]).range([oy + rh, oy]);
@@ -150,27 +166,30 @@
       if (lo - p < 0 && hi + p > 0)
         svg.append("line").attr("x1", mL).attr("x2", W - mR).attr("y1", y(0)).attr("y2", y(0))
           .attr("stroke", P.grid).attr("stroke-dasharray", "3 3");
-      // y-axis poles, left of the plot
-      svg.append("text").attr("x", mL - 6).attr("y", oy + 8).attr("text-anchor", "end")
-        .attr("class", "ax").attr("fill", P.axis).attr("font-size", "8.5px").text(info.pos);
-      svg.append("text").attr("x", mL - 6).attr("y", oy + rh - 1).attr("text-anchor", "end")
-        .attr("class", "ax").attr("fill", P.axis).attr("font-size", "8.5px").text(info.neg);
-      // axis name + live value
+      // y-axis poles (semantic view only)
+      if (s.pos) {
+        svg.append("text").attr("x", mL - 6).attr("y", oy + 8).attr("text-anchor", "end")
+          .attr("class", "ax").attr("fill", P.axis).attr("font-size", "8.5px").text(s.pos);
+        svg.append("text").attr("x", mL - 6).attr("y", oy + rh - 1).attr("text-anchor", "end")
+          .attr("class", "ax").attr("fill", P.axis).attr("font-size", "8.5px").text(s.neg);
+      }
+      // name + live value
+      const v = s.val(cur);
       svg.append("text").attr("x", mL + 4).attr("y", oy - 3).attr("class", "ct").attr("fill", P.axis)
-        .html(`${axisLabel[axis] || axis}: <tspan class="val">${cur.proj[axis] >= 0 ? "+" : ""}${cur.proj[axis].toFixed(3)}</tspan>`);
+        .html(`${s.name}: <tspan class="val">${v >= 0 ? "+" : ""}${v.toFixed(3)}</tspan>`);
       // line + hue dots
-      const line = d3.line().x((d) => x(d.hue)).y((d) => y(d.proj[axis]));
+      const line = d3.line().x((d) => x(d.hue)).y((d) => y(s.val(d)));
       svg.append("path").datum(rs).attr("d", line).attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1.2);
       svg.selectAll("c" + i).data(rs).enter().append("circle")
-        .attr("cx", (d) => x(d.hue)).attr("cy", (d) => y(d.proj[axis])).attr("r", 1.6)
+        .attr("cx", (d) => x(d.hue)).attr("cy", (d) => y(s.val(d))).attr("r", 1.6)
         .attr("fill", (d) => colorForHue(d.hue));
       // cursor + marker
       svg.append("line").attr("x1", x(cur.hue)).attr("x2", x(cur.hue)).attr("y1", oy).attr("y2", oy + rh)
         .attr("stroke", P.strong).attr("stroke-width", 1).attr("opacity", .4);
-      svg.append("circle").attr("cx", x(cur.hue)).attr("cy", y(cur.proj[axis])).attr("r", 4)
+      svg.append("circle").attr("cx", x(cur.hue)).attr("cy", y(s.val(cur))).attr("r", 4)
         .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 1.4);
       // x ticks on the last row only
-      if (i === axes.length - 1) {
+      if (i === n - 1) {
         [0, 90, 180, 270, 360].forEach((hv) => svg.append("text").attr("x", x(hv)).attr("y", oy + rh + 11)
           .attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis).attr("font-size", "8px").text(hv));
         svg.append("text").attr("x", (mL + W - mR) / 2).attr("y", oy + rh + 21).attr("text-anchor", "middle")
@@ -207,7 +226,7 @@
       b.addEventListener("click", () => {
         state.view = b.dataset.view;
         document.querySelectorAll("#viewToggle button").forEach((x) => x.classList.remove("is-active"));
-        b.classList.add("is-active"); renderPlane();
+        b.classList.add("is-active"); renderPlane(); renderCurves();
       });
     });
 
