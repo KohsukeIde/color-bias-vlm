@@ -99,7 +99,7 @@
     semantic axes (valence, safety, emotion). Color, which carries no propositional meaning here, behaves like
     evidence.</p>
   <p>That raises a question bigger than one model's quirk: if independently trained encoders are supposed to be
-    converging on a shared, abstract picture of the world, why does a semantically inert surface feature
+    converging on a shared, abstract picture of the world, why does a presentation-level feature like color
     intrude on it? Below we read our finding through the active debate on <b>representational convergence</b>.</p>
 
   <figure>
@@ -117,8 +117,11 @@
     back at the same object. On this view a clean "concept space" exists, and a word like <i>terrible</i> ought
     to sit at a fixed semantic location regardless of its color.</p>
   <p>Our result is then naturally read as a <b>failure mode</b> of that convergence: a feature that should be
-    semantically inert (text color) leaks into the shared space and biases judgment. The shadow gets repainted,
-    and the model mistakes the new shadow for a different object.</p>
+    lexically irrelevant — text color carries no propositional content, only learned associations — leaks into the
+    shared space and biases judgment. The shadow gets repainted, and the model mistakes the new shadow for a
+    different object. Read carefully, this is a <b>boundary case</b> for the strong, presentation-invariant form of
+    the hypothesis, not a direct test or refutation of it: the paper does not measure cross-model convergence; it
+    shows that for text-as-image, presentation-level variables enter the representation even when the string is fixed.</p>
 
   <h2 id="partial">3 · Convergence is partial, local, and contested</h2>
   <p>But the strong, <i>global</i> form of the Platonic hypothesis is exactly what a wave of recent work has

@@ -3,7 +3,7 @@
 [![Venue](https://img.shields.io/badge/ICPR-2026-1f6feb)](https://icpr2026.org/)
 [![Project page](https://img.shields.io/badge/🌐_Project_page-color--bias--vlm-3a4a8c)](https://kohsukeide.github.io/color-bias-vlm/)
 
-> **🌐 Interactive project page:** https://kohsukeide.github.io/color-bias-vlm/ — sweep a word's ink hue and watch its CLIP embedding move.
+> **🌐 Interactive project page:** https://kohsukeide.github.io/color-bias-vlm/ — sweep a word's text hue and watch its CLIP embedding move.
 >
 > **Project page** for *Seeing Red, Thinking Bad: Color Bias in Vision Language Models*, **ICPR 2026**.
 >
@@ -83,7 +83,7 @@ with $m(\cdot)\in\{+1, 0, -1\}$ for POSITIVE / NEUTRAL / NEGATIVE.
 | LLaVA-Vicuna-7B | +0.060 | −0.060 | 0.120 |
 | **Qwen2-VL-7B** | **+0.420** | **−0.480** | **0.900** |
 
-Qwen2-VL-7B and IDEFICS2-8B show clear directional, dose-response shifts across hue and intensity; LLaVA variants are comparatively robust at the word level.
+Qwen2-VL-7B and IDEFICS2-8B show clear directional, dose-response shifts across hue and intensity; the LLaVA variants are comparatively insensitive to word-level color styling here. This is **task-specific, not general robustness** — in the VQA contrast setup (below) their absolute F1 is very low.
 
 <p align="center">
   <img src="assets/sentimental_short.png" alt="Short-sentence sentiment bias" width="98%">
@@ -114,7 +114,7 @@ This representation-level shift is consistent with the color-induced sentiment b
 
 ### 4. Contrast prompts increase saliency-driven errors in VQA
 
-In the *Saliency Competition* condition, one span (the answer or a decoy) is rendered in high-contrast black while the rest of the text is rendered at low contrast. We report the **Induced Error Rate (IER)** — the fraction of predictions containing the decoy word — as a direct indicator of saliency-driven shortcut behavior:
+In the *Saliency Competition* condition, one span (the answer or a decoy) is rendered in high-contrast black while the rest of the text is rendered at low contrast. We report the **Induced Error Rate (IER)** — the fraction of predictions containing the decoy word — as a direct indicator of saliency-driven shortcut behavior. Note: IER is **not** a general VQA accuracy measure; it isolates decoy copying under reduced visibility, not overall correctness:
 
 | Model | g=1 | g=16 | g=64 | g=128 | g=192 | g=240 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
