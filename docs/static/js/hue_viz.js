@@ -231,12 +231,12 @@
     });
 
     document.getElementById("vizNote").innerHTML =
-      `<b>The takeaway:</b> the curve isn't flat or random — it bends <i>smoothly and systematically</i> with ` +
-      `hue (projection tends to rise toward green and fall toward red/blue). A purely visual property, ink ` +
-      `colour, is being mapped onto a <i>meaning</i> axis the text never invoked. That entanglement is what ` +
-      `lets recolouring a word steer a VLM's judgement. In <b>Raw embedding (PCA)</b> the same hue sweep ` +
-      `traces one continuous closed loop, so this is a property of the whole 768-d representation, not an ` +
-      `artefact of the axis we picked. <span class="prov">Probe: CLIP ViT-L/14-336, single-word renders, 72 hues.</span>`;
+      `<b>The takeaway:</b> the curves bend <i>smoothly and systematically</i> with hue — a purely visual ` +
+      `property (ink colour) is mapped onto <i>meaning</i> axes the text never invoked, and that entanglement ` +
+      `is what lets recolouring a word steer a VLM's judgement. The <b>Raw embedding (PCA)</b> loop is closed ` +
+      `(hue 0° rejoins 360°) and is a property of the whole 768-d embedding; it isn't a clean circle because ` +
+      `the real path is ~4–6-dimensional (you are seeing a flattened 2-D shadow) and hue itself is ` +
+      `perceptually non-uniform. <span class="prov">Probe: CLIP ViT-L/14-336, single-word renders, 72 hues.</span>`;
 
     renderAll();
   }
