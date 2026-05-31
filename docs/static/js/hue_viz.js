@@ -2,7 +2,7 @@
    Reads ./static/data/hue_data.json (real CLIP-ViT-L/14-336 measurements). */
 (function () {
   "use strict";
-  const DATA_URL = "./static/data/hue_data.json?v=3";  // bump when hue_data.json changes
+  const DATA_URL = "./static/data/hue_data.json?v=4";  // bump when hue_data.json changes
   const CURVE_AXES = ["valence", "emotion", "safety", "temperature"];
   // each word's "own" bipolar axis (its meaning vs. its opposite)
   const PRIMARY = { warm: "temperature", cold: "temperature", safe: "safety", dangerous: "safety" };
@@ -10,8 +10,9 @@
 
   const state = { word: "warm", hue: 0, view: "axis" };
   const rot = { x: -0.45, y: 0.7 };   // 3D rotation for the raw-embedding view
-  let DATA, hueHex = {}, axisLabel = {}, axisInfo = {};
+  let DATA, hueHex = {}, axisLabel = {}, axisInfo = {}, COLOR_ONLY = "(colour only)";
   const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+  const dispName = (w) => (w === COLOR_ONLY ? "pure colour" : w);
 
   // theme-aware neutral palette read from CSS variables
   function pal() {
@@ -41,7 +42,12 @@
   function renderStimulus() {
     const hex = colorForHue(state.hue);
     const w = document.getElementById("stimulusWord");
-    w.textContent = state.word; w.style.color = hex;
+    const canvas = document.querySelector(".stimulus-canvas");
+    if (state.word === COLOR_ONLY) {           // pure colour: show a filled swatch, no text
+      w.textContent = ""; if (canvas) canvas.style.background = hex;
+    } else {
+      w.textContent = state.word; w.style.color = hex; if (canvas) canvas.style.background = "#fff";
+    }
     document.getElementById("swatch").style.background = hex;
     document.getElementById("swatchHex").textContent = hex + "  ·  " + state.hue + "°";
     document.getElementById("hueVal").textContent = state.hue + "°";
@@ -74,7 +80,7 @@
     const pole = cur.proj[key] >= 0 ? info.pos : info.neg;
     svg.append("text").attr("x", W / 2).attr("y", 22).attr("text-anchor", "middle")
       .attr("class", "ct").attr("fill", P.strong).attr("font-size", "14px").attr("font-weight", 700)
-      .text(`“${state.word}” leans ${Math.abs(cur.proj[key]).toFixed(3)} toward ${pole}`);
+      .text(`“${dispName(state.word)}” leans ${Math.abs(cur.proj[key]).toFixed(3)} toward ${pole}`);
     svg.append("text").attr("x", W / 2).attr("y", 41).attr("text-anchor", "middle")
       .attr("class", "ax").attr("fill", P.axis)
       .text(`${sgn(cur.proj[key] - red.proj[key])}${(cur.proj[key] - red.proj[key]).toFixed(3)} toward ${info.pos} vs. red ink (0°)`);
@@ -231,6 +237,7 @@
   // ---------------- init ----------------
   function init(data) {
     DATA = data;
+    COLOR_ONLY = data.meta.colorOnlyKey || COLOR_ONLY;
     (data.hueColors || []).forEach((d) => (hueHex[d.hue] = d.hex));
     (data.axes || []).forEach((a) => {
       axisLabel[a.key] = a.label;
@@ -241,7 +248,8 @@
     const sentiment = new Set(data.meta.sentimentWords || []);
     data.meta.words.forEach((w) => {
       const o = document.createElement("option");
-      o.value = w; o.textContent = sentiment.has(w) ? w + "  (sentiment)" : w;
+      o.value = w;
+      o.textContent = w === COLOR_ONLY ? "■ colour only (no word)" : (sentiment.has(w) ? w + "  (sentiment)" : w);
       sel.appendChild(o);
     });
     sel.value = state.word;
@@ -264,13 +272,14 @@
     });
 
     document.getElementById("vizNote").innerHTML =
-      `<b>The takeaway:</b> the curves bend <i>smoothly and systematically</i> with hue — a purely visual ` +
-      `property (ink colour) is mapped onto <i>meaning</i> axes the text never invoked, and that entanglement ` +
-      `is what lets recolouring a word steer a VLM's judgement. The <b>Raw embedding (PCA)</b> loop is closed ` +
-      `(hue 0° rejoins 360°, cosine 0.99) and is a property of the whole 768-d embedding. It isn't a clean ` +
-      `circle: the path is genuinely ~4–6-dimensional, so even the rotatable 3-D view captures only ~⅔ of it ` +
-      `— and hue itself is perceptually non-uniform (the loop crawls near red, races near cyan). ` +
-      `<span class="prov">Probe: CLIP ViT-L/14-336, single-word renders, 72 hues.</span>`;
+      `<b>The takeaway:</b> recolouring steers the encoder in two ways. <b>(1) Colour itself carries meaning</b> ` +
+      `— pick <b>■ colour only</b>: a plain green swatch already leans <i>positive / safe</i>, a red one ` +
+      `<i>negative</i>, with no word at all. <b>(2) But colouring a <i>word</i> is more than adding that ` +
+      `colour vector</b>: a word's hue-driven movement overlaps the pure-colour direction by only ~8%, so the ` +
+      `colour largely <i>reshapes how that specific word is represented</i> — a colour×word interaction. Either ` +
+      `way a non-semantic property pushes the representation along meaning axes, which is what lets styling bias ` +
+      `a VLM. (The 3-D loop is closed but genuinely ~4–6-D, so you see a partial shadow.) ` +
+      `<span class="prov">Probe: CLIP ViT-L/14-336, 72 hues; “colour only” = filled swatches.</span>`;
 
     renderAll();
   }
