@@ -177,33 +177,6 @@
   </div>
 </section>
 
-<!-- ===================== PLATONIC READING ===================== -->
-<section class="section">
-  <div class="container narrow">
-    <h2 class="title is-4 sec-title">A Platonic &mdash; and Umwelt &mdash; reading</h2>
-    <figure>
-      <img src="./static/images/teaser_concept.png" alt="A biased shadow on the wall: recoloring shifts valence">
-      <figcaption>The same token <span class="mono">"terrible"</span> in black vs. green ink is encoded with a
-        different valence projection — red ink is most negative, green nudges it toward positive — even though
-        the string is unchanged. Values are real CLIP measurements at the probe rendering.</figcaption>
-    </figure>
-    <p class="body-text mt">
-      Why should an inert surface feature move a semantic judgment? One reading is through the
-      <b>Platonic Representation Hypothesis</b>
-      (<a href="https://arxiv.org/abs/2405.07987" target="_blank" rel="noopener">Huh&nbsp;et&nbsp;al., 2024</a>):
-      if encoders converge toward a shared concept space, colour leakage is a <i>failure mode</i> of that
-      convergence. But the strong, global form of that hypothesis is contested &mdash; recent work argues
-      convergence is partial, local, and niche-shaped &mdash; and under the
-      <b>Umwelt Representation Hypothesis</b> the same colour&nbsp;&rarr;&nbsp;valence coupling is instead a
-      <i>predicted</i> imprint of CLIP's human-centric training. Either way, surface appearance steers meaning.
-    </p>
-    <p class="body-text">
-      <b><a href="./platonic.html">Read the full interpretive companion &rarr;</a></b>
-      &nbsp;<span class="small">— a Platonic / Aristotelian / Umwelt reading, with references and caveats.</span>
-    </p>
-  </div>
-</section>
-
 <!-- ===================== FINDINGS ===================== -->
 <section class="section alt">
   <div class="container narrow">
@@ -267,6 +240,34 @@
       screenshots: <b>benign or adversarial styling can steer model decisions without changing the underlying
       text.</b> Practical safeguards include normalizing rendered text before inference, cross-checking
       image-based answers with OCR-extracted text, and adding style-invariance checks to evaluation suites.
+    </p>
+  </div>
+</section>
+
+<!-- ============ PLATONIC READING (interpretive companion, beyond the paper) ============ -->
+<section class="section alt">
+  <div class="container narrow">
+    <h2 class="title is-4 sec-title">A Platonic &mdash; and Umwelt &mdash; reading</h2>
+    <p class="small">Beyond the paper &mdash; an interpretive companion, not part of the paper itself.</p>
+    <figure class="mt">
+      <img src="./static/images/teaser_concept.png" alt="A biased shadow on the wall: recoloring shifts valence">
+      <figcaption>The same token <span class="mono">"terrible"</span> in black vs. green ink is encoded with a
+        different valence projection — red ink is most negative, green nudges it toward positive — even though
+        the string is unchanged. Values are real CLIP measurements at the probe rendering.</figcaption>
+    </figure>
+    <p class="body-text mt">
+      Why should an inert surface feature move a semantic judgment? One reading is through the
+      <b>Platonic Representation Hypothesis</b>
+      (<a href="https://arxiv.org/abs/2405.07987" target="_blank" rel="noopener">Huh&nbsp;et&nbsp;al., 2024</a>):
+      if encoders converge toward a shared concept space, colour leakage is a <i>failure mode</i> of that
+      convergence. But the strong, global form of that hypothesis is contested &mdash; recent work argues
+      convergence is partial, local, and niche-shaped &mdash; and under the
+      <b>Umwelt Representation Hypothesis</b> the same colour&nbsp;&rarr;&nbsp;valence coupling is instead a
+      <i>predicted</i> imprint of CLIP's human-centric training. Either way, surface appearance steers meaning.
+    </p>
+    <p class="body-text">
+      <b><a href="./platonic.html">Read the full interpretive companion &rarr;</a></b>
+      &nbsp;<span class="small">— a Platonic / Aristotelian / Umwelt reading, with references and caveats.</span>
     </p>
   </div>
 </section>
