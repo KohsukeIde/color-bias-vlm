@@ -48,62 +48,60 @@
   // ---------------- embedding panel ----------------
   function renderPlane() { return state.view === "pca" ? renderPca() : renderAxisView(); }
 
-  // Default view: where the encoder places the word between its OWN opposites
-  // (e.g. for "warm", how far toward warm vs. cold). One interpretable axis.
+  // Default view: a big curve of the word's OWN axis (e.g. cold↔warm) vs. ink
+  // hue. Fills the panel; the y-axis poles make "which way is which" explicit.
   function renderAxisView() {
     const svg = d3.select("#planeSvg"); svg.selectAll("*").remove();
     const P = pal();
-    const W = 360, cy = 168, cx0 = 52, cx1 = W - 52;
+    const W = 360, H = 300, m = { t: 54, r: 16, b: 30, l: 30 };
     const key = primaryAxis(state.word);
     const info = axisInfo[key] || { pos: key, neg: "not-" + key };
     const rs = rows();
     const vals = rs.map((d) => d.proj[key]);
-    const M = Math.max(...vals.map((v) => Math.abs(v))) * 1.18 || 0.1;
-    const x = d3.scaleLinear().domain([-M, M]).range([cx0, cx1]);
+    const lo = Math.min(...vals), hi = Math.max(...vals), p = (hi - lo) * 0.18 || 0.02;
+    const x = d3.scaleLinear().domain([0, 360]).range([m.l, W - m.r]);
+    const y = d3.scaleLinear().domain([lo - p, hi + p]).range([H - m.b, m.t]);
     const cur = rowAt(state.hue);
     const red = rs.reduce((a, b) => Math.abs(b.hue) < Math.abs(a.hue) ? b : a);
     const sgn = (n) => (n >= 0 ? "+" : "");
 
     document.getElementById("planeLabel").innerHTML = `Antonym axis &middot; ${info.neg} ↔ ${info.pos}`;
 
-    // top readout (lean toward whichever pole the sign points to)
+    // top readout: lean toward whichever pole the sign points to, + Δ vs red
     const pole = cur.proj[key] >= 0 ? info.pos : info.neg;
-    svg.append("text").attr("x", W / 2).attr("y", 40).attr("text-anchor", "middle")
+    svg.append("text").attr("x", W / 2).attr("y", 22).attr("text-anchor", "middle")
       .attr("class", "ct").attr("fill", P.strong).attr("font-size", "14px").attr("font-weight", 700)
       .text(`“${state.word}” leans ${Math.abs(cur.proj[key]).toFixed(3)} toward ${pole}`);
-    svg.append("text").attr("x", W / 2).attr("y", 60).attr("text-anchor", "middle")
+    svg.append("text").attr("x", W / 2).attr("y", 41).attr("text-anchor", "middle")
       .attr("class", "ax").attr("fill", P.axis)
       .text(`${sgn(cur.proj[key] - red.proj[key])}${(cur.proj[key] - red.proj[key]).toFixed(3)} toward ${info.pos} vs. red ink (0°)`);
 
-    // range bracket over all hues
-    const lo = Math.min(...vals), hi = Math.max(...vals);
-    svg.append("line").attr("x1", x(lo)).attr("x2", x(hi)).attr("y1", cy - 34).attr("y2", cy - 34)
-      .attr("stroke", P.line).attr("stroke-width", 3).attr("stroke-linecap", "round");
-    svg.append("text").attr("x", (x(lo) + x(hi)) / 2).attr("y", cy - 42).attr("text-anchor", "middle")
-      .attr("class", "ax").attr("fill", P.axis).text("range over all 72 hues");
-
-    // main axis line + poles + neutral tick
-    svg.append("line").attr("x1", cx0).attr("x2", cx1).attr("y1", cy).attr("y2", cy)
-      .attr("stroke", P.axis).attr("stroke-width", 1.5);
-    svg.append("text").attr("x", cx0 - 6).attr("y", cy + 4).attr("text-anchor", "end")
-      .attr("class", "ax").attr("fill", P.strong).attr("font-weight", 700).text(info.neg);
-    svg.append("text").attr("x", cx1 + 6).attr("y", cy + 4).attr("text-anchor", "start")
-      .attr("class", "ax").attr("fill", P.strong).attr("font-weight", 700).text(info.pos);
-    svg.append("line").attr("x1", x(0)).attr("x2", x(0)).attr("y1", cy - 9).attr("y2", cy + 9).attr("stroke", P.grid);
-    svg.append("text").attr("x", x(0)).attr("y", cy + 28).attr("text-anchor", "middle")
-      .attr("class", "ax").attr("fill", P.axis).text("0 (neutral)");
-
-    // hue-colored rug: every hue's position on the axis
-    svg.selectAll("line.rug").data(rs).enter().append("line").attr("class", "rug")
-      .attr("x1", (d) => x(d.proj[key])).attr("x2", (d) => x(d.proj[key]))
-      .attr("y1", cy + 4).attr("y2", cy + 13)
-      .attr("stroke", (d) => colorForHue(d.hue)).attr("stroke-width", 2).attr("opacity", .85);
-
-    // current marker
-    const xc = x(cur.proj[key]);
-    svg.append("line").attr("x1", xc).attr("x2", xc).attr("y1", cy - 20).attr("y2", cy + 20)
-      .attr("stroke", P.strong).attr("stroke-width", 1).attr("opacity", .45);
-    svg.append("circle").attr("cx", xc).attr("cy", cy).attr("r", 9)
+    // frame + zero line
+    svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", H - m.b).attr("y2", H - m.b).attr("stroke", P.grid);
+    svg.append("line").attr("x1", m.l).attr("x2", m.l).attr("y1", m.t).attr("y2", H - m.b).attr("stroke", P.grid);
+    if (lo - p < 0 && hi + p > 0)
+      svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(0)).attr("y2", y(0))
+        .attr("stroke", P.grid).attr("stroke-dasharray", "3 3");
+    // y-axis poles (top = pos, bottom = neg) — makes the vertical meaning explicit
+    svg.append("text").attr("x", m.l + 4).attr("y", m.t + 4).attr("class", "ax").attr("fill", P.strong)
+      .attr("font-weight", 700).text("↑ " + info.pos);
+    svg.append("text").attr("x", m.l + 4).attr("y", H - m.b - 5).attr("class", "ax").attr("fill", P.strong)
+      .attr("font-weight", 700).text("↓ " + info.neg);
+    // x ticks (ink hue)
+    [0, 90, 180, 270, 360].forEach((hv) => svg.append("text").attr("x", x(hv)).attr("y", H - m.b + 12)
+      .attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis).attr("font-size", "8px").text(hv));
+    svg.append("text").attr("x", (W + m.l - m.r) / 2).attr("y", H - 3).attr("text-anchor", "middle")
+      .attr("class", "ax").attr("fill", P.axis).text("ink hue (°)");
+    // hue-colored line + dots
+    const line = d3.line().x((d) => x(d.hue)).y((d) => y(d.proj[key]));
+    svg.append("path").datum(rs).attr("d", line).attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1.6);
+    svg.selectAll("circle.pt").data(rs).enter().append("circle")
+      .attr("cx", (d) => x(d.hue)).attr("cy", (d) => y(d.proj[key])).attr("r", 2.6)
+      .attr("fill", (d) => colorForHue(d.hue)).attr("stroke", P.ring).attr("stroke-width", .5);
+    // cursor + current marker
+    svg.append("line").attr("x1", x(cur.hue)).attr("x2", x(cur.hue)).attr("y1", m.t).attr("y2", H - m.b)
+      .attr("stroke", P.strong).attr("stroke-width", 1).attr("opacity", .4);
+    svg.append("circle").attr("cx", x(cur.hue)).attr("cy", y(cur.proj[key])).attr("r", 8)
       .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 2);
   }
 
@@ -113,7 +111,7 @@
     const P = pal();
     const W = 360, H = 300, m = { t: 26, r: 16, b: 28, l: 28 };
     const rs = rows();
-    const pad = (a) => { const lo = Math.min(...a), hi = Math.max(...a), p = (hi - lo) * 0.18 || 0.05; return [lo - p, hi + p]; };
+    const pad = (a) => { const lo = Math.min(...a), hi = Math.max(...a), p = (hi - lo) * 0.07 || 0.05; return [lo - p, hi + p]; };
     const x = d3.scaleLinear().domain(pad(rs.map((d) => d.wx))).range([m.l, W - m.r]);
     const y = d3.scaleLinear().domain(pad(rs.map((d) => d.wy))).range([H - m.b, m.t]);
     document.getElementById("planeLabel").innerHTML = "Raw embedding &middot; within-word PCA(2)";
@@ -121,8 +119,6 @@
     svg.append("line").attr("x1", m.l).attr("x2", m.l).attr("y1", m.t).attr("y2", H - m.b).attr("stroke", P.grid);
     svg.append("text").attr("x", (W + m.l - m.r) / 2).attr("y", H - 6).attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis).text("PC1 →");
     svg.append("text").attr("transform", `translate(11,${(H - m.b + m.t) / 2}) rotate(-90)`).attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis).text("PC2 →");
-    svg.append("text").attr("x", W - m.r).attr("y", 14).attr("text-anchor", "end").attr("class", "ax").attr("fill", P.axis)
-      .text("axes aren't individually meaningful — watch the motion");
     const line = d3.line().x((d) => x(d.wx)).y((d) => y(d.wy));
     svg.append("path").datum(rs).attr("d", line).attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1.4);
     svg.selectAll("circle.pt").data(rs).enter().append("circle")
@@ -133,50 +129,53 @@
       .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 2);
   }
 
-  // ---------------- tuning curves (2x2) ----------------
+  // ---------------- other axes (stacked, full-width) ----------------
   function renderCurves() {
     const svg = d3.select("#curvesSvg"); svg.selectAll("*").remove();
     const P = pal();
-    const W = 360, H = 300, cols = 2, rowsN = 2, gx = 12, gy = 26;
-    const cw = (W - gx * (cols + 1)) / cols, ch = (H - gy * (rowsN + 1)) / rowsN;
-    const rs = rows();
-    // show the word's own axis first
+    const W = 360, H = 300, top = 14, mL = 60, mR = 12, rowGap = 18, bottom = 24;
     const pk = primaryAxis(state.word);
-    const order = [pk].concat(CURVE_AXES.filter((a) => a !== pk));
-    order.forEach((axis, i) => {
-      const cxi = i % cols, cyi = Math.floor(i / cols);
-      const ox = gx + cxi * (cw + gx), oy = gy + cyi * (ch + gy);
+    const axes = CURVE_AXES.filter((a) => a !== pk);          // the 3 other axes
+    const rh = (H - top - rowGap * (axes.length - 1) - bottom) / axes.length;
+    const rs = rows(), cur = rowAt(state.hue);
+    axes.forEach((axis, i) => {
+      const oy = top + i * (rh + rowGap);
       const info = axisInfo[axis] || { pos: axis, neg: "" };
       const vals = rs.map((d) => d.proj[axis]);
-      const lo = Math.min(...vals), hi = Math.max(...vals), p = (hi - lo) * 0.15 || 0.02;
-      const x = d3.scaleLinear().domain([0, 360]).range([ox, ox + cw]);
-      const y = d3.scaleLinear().domain([lo - p, hi + p]).range([oy + ch, oy]);
-      const cell = svg.append("g");
-      if (lo - p < 0 && hi + p > 0)
-        cell.append("line").attr("x1", ox).attr("x2", ox + cw).attr("y1", y(0)).attr("y2", y(0))
-          .attr("stroke", P.grid).attr("stroke-dasharray", "3 3");
-      cell.append("rect").attr("x", ox).attr("y", oy).attr("width", cw).attr("height", ch)
+      const lo = Math.min(...vals), hi = Math.max(...vals), p = (hi - lo) * 0.18 || 0.02;
+      const x = d3.scaleLinear().domain([0, 360]).range([mL, W - mR]);
+      const y = d3.scaleLinear().domain([lo - p, hi + p]).range([oy + rh, oy]);
+      svg.append("rect").attr("x", mL).attr("y", oy).attr("width", W - mR - mL).attr("height", rh)
         .attr("fill", "none").attr("stroke", P.grid);
-      // title: poles + live readout (the poles ARE the meaning of the y-axis)
-      const cur = rowAt(state.hue);
-      cell.append("text").attr("x", ox).attr("y", oy - 8).attr("class", "ct").attr("fill", P.axis)
-        .html(`${info.neg}→${info.pos}: <tspan class="val">${cur.proj[axis] >= 0 ? "+" : ""}${cur.proj[axis].toFixed(3)}</tspan>`);
-      // x ticks (ink hue)
-      [0, 360].forEach((hv) => cell.append("text").attr("x", x(hv)).attr("y", oy + ch + 9)
-        .attr("text-anchor", hv === 0 ? "start" : "end").attr("class", "ax").attr("fill", P.axis)
-        .attr("font-size", "8px").text(hv + "°"));
+      if (lo - p < 0 && hi + p > 0)
+        svg.append("line").attr("x1", mL).attr("x2", W - mR).attr("y1", y(0)).attr("y2", y(0))
+          .attr("stroke", P.grid).attr("stroke-dasharray", "3 3");
+      // y-axis poles, left of the plot
+      svg.append("text").attr("x", mL - 6).attr("y", oy + 8).attr("text-anchor", "end")
+        .attr("class", "ax").attr("fill", P.axis).attr("font-size", "8.5px").text(info.pos);
+      svg.append("text").attr("x", mL - 6).attr("y", oy + rh - 1).attr("text-anchor", "end")
+        .attr("class", "ax").attr("fill", P.axis).attr("font-size", "8.5px").text(info.neg);
+      // axis name + live value
+      svg.append("text").attr("x", mL + 4).attr("y", oy - 3).attr("class", "ct").attr("fill", P.axis)
+        .html(`${axisLabel[axis] || axis}: <tspan class="val">${cur.proj[axis] >= 0 ? "+" : ""}${cur.proj[axis].toFixed(3)}</tspan>`);
       // line + hue dots
       const line = d3.line().x((d) => x(d.hue)).y((d) => y(d.proj[axis]));
-      cell.append("path").datum(rs).attr("d", line).attr("fill", "none")
-        .attr("stroke", P.line).attr("stroke-width", 1.2);
-      cell.selectAll("circle.d" + i).data(rs).enter().append("circle")
-        .attr("cx", (d) => x(d.hue)).attr("cy", (d) => y(d.proj[axis])).attr("r", 1.8)
+      svg.append("path").datum(rs).attr("d", line).attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1.2);
+      svg.selectAll("c" + i).data(rs).enter().append("circle")
+        .attr("cx", (d) => x(d.hue)).attr("cy", (d) => y(d.proj[axis])).attr("r", 1.6)
         .attr("fill", (d) => colorForHue(d.hue));
-      // cursor
-      cell.append("line").attr("x1", x(state.hue)).attr("x2", x(state.hue)).attr("y1", oy).attr("y2", oy + ch)
-        .attr("stroke", P.strong).attr("stroke-width", 1).attr("opacity", .5);
-      cell.append("circle").attr("cx", x(cur.hue)).attr("cy", y(cur.proj[axis])).attr("r", 5)
-        .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 1.6);
+      // cursor + marker
+      svg.append("line").attr("x1", x(cur.hue)).attr("x2", x(cur.hue)).attr("y1", oy).attr("y2", oy + rh)
+        .attr("stroke", P.strong).attr("stroke-width", 1).attr("opacity", .4);
+      svg.append("circle").attr("cx", x(cur.hue)).attr("cy", y(cur.proj[axis])).attr("r", 4)
+        .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 1.4);
+      // x ticks on the last row only
+      if (i === axes.length - 1) {
+        [0, 90, 180, 270, 360].forEach((hv) => svg.append("text").attr("x", x(hv)).attr("y", oy + rh + 11)
+          .attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis).attr("font-size", "8px").text(hv));
+        svg.append("text").attr("x", (mL + W - mR) / 2).attr("y", oy + rh + 21).attr("text-anchor", "middle")
+          .attr("class", "ax").attr("fill", P.axis).text("ink hue (°)");
+      }
     });
   }
 
@@ -213,12 +212,12 @@
     });
 
     document.getElementById("vizNote").innerHTML =
-      `<b>Antonym axis</b>: the word's projection onto its own opposite (e.g. warm vs. cold), measured as a ` +
-      `CLIP cosine direction — higher = the encoder reads it more strongly as that meaning. ` +
-      `<b>Raw embedding (PCA)</b>: the full 768-d CLIP image embedding reduced to 2D; the axes aren't ` +
-      `individually interpretable — what matters is that the point moves as hue changes. ` +
-      `Small charts: x = ink hue (0–360°), y = projection onto each axis. ` +
-      `Probe rendering: ${data.meta.rendering}.`;
+      `<b>The takeaway:</b> the curve isn't flat or random — it bends <i>smoothly and systematically</i> with ` +
+      `hue (projection tends to rise toward green and fall toward red/blue). A purely visual property, ink ` +
+      `colour, is being mapped onto a <i>meaning</i> axis the text never invoked. That entanglement is what ` +
+      `lets recolouring a word steer a VLM's judgement. In <b>Raw embedding (PCA)</b> the same hue sweep ` +
+      `traces one continuous closed loop, so this is a property of the whole 768-d representation, not an ` +
+      `artefact of the axis we picked. <span class="prov">Probe: CLIP ViT-L/14-336, single-word renders, 72 hues.</span>`;
 
     renderAll();
   }

@@ -119,7 +119,8 @@ figcaption{font-size:.88rem;color:var(--muted);margin-top:.6rem;text-align:left;
 .swatch{width:22px;height:22px;border-radius:6px;border:1px solid var(--swatch-bd);display:inline-block}
 .small{font-size:.82rem;color:var(--muted)}
 .viz-grid svg{width:100%;height:auto;display:block}
-.viz-note{font-size:.82rem;color:var(--muted);margin-top:.9rem;text-align:center}
+.viz-note{font-size:.82rem;color:var(--muted);margin-top:.9rem;text-align:center;line-height:1.55}
+.viz-note .prov{display:inline-block;margin-top:.2rem;opacity:.7;font-size:.76rem}
 .buttons .button{background:var(--viz-card-bg);color:var(--ink);border-color:var(--line)}
 .is-active{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important}
 
