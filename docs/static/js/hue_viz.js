@@ -9,6 +9,17 @@
   const state = { word: "terrible", hue: 0, view: "semantic" };
   let DATA, hueHex = {}, axisLabel = {};
 
+  // theme-aware neutral palette read from CSS variables
+  function pal() {
+    const cs = getComputedStyle(document.documentElement);
+    const v = (n, d) => (cs.getPropertyValue(n).trim() || d);
+    return {
+      line: v("--viz-line", "#c9cedb"), grid: v("--viz-grid", "#e3e6ef"),
+      axis: v("--viz-axis", "#7a8090"), strong: v("--viz-strong", "#1d1d28"),
+      ring: v("--viz-ring", "#ffffff"),
+    };
+  }
+
   function hsv2hex(h, s, v) {
     const c = v * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = v - c;
     let r = 0, g = 0, b = 0;
@@ -35,6 +46,7 @@
   // ---------------- embedding plane ----------------
   function renderPlane() {
     const svg = d3.select("#planeSvg"); svg.selectAll("*").remove();
+    const P = pal();
     const W = 360, H = 300, m = { t: 22, r: 18, b: 34, l: 40 };
     const semantic = state.view === "semantic";
     const xKey = semantic ? PLANE_AXES[0] : "wx";
@@ -54,32 +66,33 @@
     // axes
     const g = svg.append("g");
     g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", H - m.b).attr("y2", H - m.b)
-      .attr("stroke", "#d7dae4");
+      .attr("stroke", P.grid);
     g.append("line").attr("x1", m.l).attr("x2", m.l).attr("y1", m.t).attr("y2", H - m.b)
-      .attr("stroke", "#d7dae4");
+      .attr("stroke", P.grid);
     g.append("text").attr("x", (W + m.l - m.r) / 2).attr("y", H - 8).attr("text-anchor", "middle")
-      .attr("class", "ax").text(semantic ? (axisLabel.valence || "valence") + " →" : "PC1 →");
+      .attr("class", "ax").attr("fill", P.axis).text(semantic ? (axisLabel.valence || "valence") + " →" : "PC1 →");
     g.append("text").attr("transform", `translate(12,${(H - m.b + m.t) / 2}) rotate(-90)`)
-      .attr("text-anchor", "middle").attr("class", "ax")
+      .attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis)
       .text(semantic ? (axisLabel.emotion || "emotion") + " →" : "PC2 →");
 
     // trajectory path (hue order)
     const line = d3.line().x((d) => x(getX(d))).y((d) => y(getY(d)));
     svg.append("path").datum(rs).attr("d", line).attr("fill", "none")
-      .attr("stroke", "#c9cedb").attr("stroke-width", 1.4);
+      .attr("stroke", P.line).attr("stroke-width", 1.4);
     // hue-colored dots
     svg.selectAll("circle.pt").data(rs).enter().append("circle").attr("class", "pt")
       .attr("cx", (d) => x(getX(d))).attr("cy", (d) => y(getY(d))).attr("r", 3)
-      .attr("fill", (d) => colorForHue(d.hue)).attr("stroke", "#fff").attr("stroke-width", .6);
+      .attr("fill", (d) => colorForHue(d.hue)).attr("stroke", P.ring).attr("stroke-width", .6);
     // current point
     const cur = rowAt(state.hue);
     svg.append("circle").attr("cx", x(getX(cur))).attr("cy", y(getY(cur))).attr("r", 8)
-      .attr("fill", colorForHue(cur.hue)).attr("stroke", "#1d1d28").attr("stroke-width", 2);
+      .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 2);
   }
 
   // ---------------- tuning curves (2x2) ----------------
   function renderCurves() {
     const svg = d3.select("#curvesSvg"); svg.selectAll("*").remove();
+    const P = pal();
     const W = 360, H = 300, cols = 2, rowsN = 2, gx = 12, gy = 26;
     const cw = (W - gx * (cols + 1)) / cols, ch = (H - gy * (rowsN + 1)) / rowsN;
     const rs = rows();
@@ -94,25 +107,25 @@
       // zero line
       if (lo - p < 0 && hi + p > 0)
         cell.append("line").attr("x1", ox).attr("x2", ox + cw).attr("y1", y(0)).attr("y2", y(0))
-          .attr("stroke", "#eceef4").attr("stroke-dasharray", "3 3");
+          .attr("stroke", P.grid).attr("stroke-dasharray", "3 3");
       cell.append("rect").attr("x", ox).attr("y", oy).attr("width", cw).attr("height", ch)
-        .attr("fill", "none").attr("stroke", "#e3e6ef");
+        .attr("fill", "none").attr("stroke", P.grid);
       // title + live readout
       const cur = rowAt(state.hue);
-      cell.append("text").attr("x", ox).attr("y", oy - 8).attr("class", "ct")
+      cell.append("text").attr("x", ox).attr("y", oy - 8).attr("class", "ct").attr("fill", P.axis)
         .html(`${axisLabel[axis] || axis}: <tspan class="val">${cur.proj[axis] >= 0 ? "+" : ""}${cur.proj[axis].toFixed(3)}</tspan>`);
       // line
       const line = d3.line().x((d) => x(d.hue)).y((d) => y(d.proj[axis]));
       cell.append("path").datum(rs).attr("d", line).attr("fill", "none")
-        .attr("stroke", "#c9cedb").attr("stroke-width", 1.2);
+        .attr("stroke", P.line).attr("stroke-width", 1.2);
       cell.selectAll("circle.d" + i).data(rs).enter().append("circle")
         .attr("cx", (d) => x(d.hue)).attr("cy", (d) => y(d.proj[axis])).attr("r", 1.8)
         .attr("fill", (d) => colorForHue(d.hue));
       // cursor
       cell.append("line").attr("x1", x(state.hue)).attr("x2", x(state.hue)).attr("y1", oy).attr("y2", oy + ch)
-        .attr("stroke", "#1d1d28").attr("stroke-width", 1).attr("opacity", .5);
+        .attr("stroke", P.strong).attr("stroke-width", 1).attr("opacity", .5);
       cell.append("circle").attr("cx", x(cur.hue)).attr("cy", y(cur.proj[axis])).attr("r", 5)
-        .attr("fill", colorForHue(cur.hue)).attr("stroke", "#1d1d28").attr("stroke-width", 1.6);
+        .attr("fill", colorForHue(cur.hue)).attr("stroke", P.strong).attr("stroke-width", 1.6);
     });
   }
 
@@ -156,9 +169,12 @@
 
   // SVG text styling injected (kept with the viz)
   const css = document.createElement("style");
-  css.textContent = "#planeSvg .ax,#curvesSvg .ct{font-family:Inter,sans-serif;font-size:10px;fill:#7a8090}" +
-    "#curvesSvg .ct .val{fill:#1d1d28;font-weight:700}";
+  css.textContent = "#planeSvg .ax,#curvesSvg .ct{font-family:Inter,sans-serif;font-size:10px}" +
+    "#curvesSvg .ct .val{fill:var(--viz-strong);font-weight:700}";
   document.head.appendChild(css);
+
+  // re-render the viz when the page theme changes
+  window.addEventListener("themechange", function () { if (DATA) renderAll(); });
 
   d3.json(DATA_URL).then(init).catch((e) => {
     document.getElementById("vizNote").textContent = "Could not load visualization data (" + e + ").";
