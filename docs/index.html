@@ -131,7 +131,7 @@
   <div class="container">
     <h2 class="title is-4 sec-title centered">Sweep the hue, watch the meaning move</h2>
     <p class="body-text centered narrow-c">
-      The word string never changes — only its ink hue. Yet, a Vision encoder (CLIP) places the recolored
+      The word string never changes — only its hue. Yet, a Vision encoder (CLIP) places the recolored
       word at a different location in concept space. Drag the slider to sweep the hue and watch how strongly
       the word reads as its own meaning (e.g. how <i>warm</i> "warm" looks), live, from
       <b>real measured data</b>.
@@ -144,7 +144,7 @@
           <div class="select is-small"><select id="wordSelect"></select></div>
         </div>
         <div class="ctrl grow">
-          <label for="hueSlider">Ink hue <span id="hueVal" class="mono"></span></label>
+          <label for="hueSlider">Text hue <span id="hueVal" class="mono"></span></label>
           <input type="range" id="hueSlider" min="0" max="355" step="5" value="0">
         </div>
         <div class="ctrl">
@@ -251,8 +251,8 @@
     <p class="small">Beyond the paper &mdash; an interpretive companion, not part of the paper itself.</p>
     <figure class="mt">
       <img src="./static/images/teaser_concept.png" alt="A biased shadow on the wall: recoloring shifts valence">
-      <figcaption>The same token <span class="mono">"terrible"</span> in black vs. green ink is encoded with a
-        different valence projection — red ink is most negative, green nudges it toward positive — even though
+      <figcaption>The same token <span class="mono">"terrible"</span> in black vs. green text is encoded with a
+        different valence projection — red is most negative, green nudges it toward positive — even though
         the string is unchanged. Values are real CLIP measurements at the probe rendering.</figcaption>
     </figure>
     <p class="body-text mt">

@@ -79,7 +79,7 @@
       .text(`“${name}” leans ${Math.abs(cur.proj[key]).toFixed(3)} toward ${pole}`);
     svg.append("text").attr("x", W / 2).attr("y", 41).attr("text-anchor", "middle")
       .attr("class", "ax").attr("fill", P.axis)
-      .text(`${sgn(cur.proj[key] - red.proj[key])}${(cur.proj[key] - red.proj[key]).toFixed(3)} toward ${info.pos} vs. red ink (0°)`);
+      .text(`${sgn(cur.proj[key] - red.proj[key])}${(cur.proj[key] - red.proj[key]).toFixed(3)} toward ${info.pos} vs. red (0°)`);
 
     svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", H - m.b).attr("y2", H - m.b).attr("stroke", P.grid);
     svg.append("line").attr("x1", m.l).attr("x2", m.l).attr("y1", m.t).attr("y2", H - m.b).attr("stroke", P.grid);
@@ -93,7 +93,7 @@
     [0, 90, 180, 270, 360].forEach((hv) => svg.append("text").attr("x", x(hv)).attr("y", H - m.b + 12)
       .attr("text-anchor", "middle").attr("class", "ax").attr("fill", P.axis).attr("font-size", "8px").text(hv));
     svg.append("text").attr("x", (W + m.l - m.r) / 2).attr("y", H - 3).attr("text-anchor", "middle")
-      .attr("class", "ax").attr("fill", P.axis).text("ink hue (°)");
+      .attr("class", "ax").attr("fill", P.axis).text("text hue (°)");
     svg.append("path").datum(rs).attr("fill", "none").attr("stroke", P.line).attr("stroke-width", 1.6)
       .attr("d", d3.line().x((d) => x(d.hue)).y((d) => y(d.proj[key])));
     svg.selectAll("circle.pt").data(rs).enter().append("circle")
