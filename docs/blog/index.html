@@ -66,8 +66,7 @@
   <div class="container">
     <div class="art-kicker">Interpretive companion · Blog</div>
     <h1 class="art-title">A Platonic — and Umwelt — reading of color bias</h1>
-    <p class="art-sub">How a presentation-level feature such as text color enters a vision encoder's
-      representation, read through the current debate on representational convergence.</p>
+    <p class="art-sub">A note on what color bias says, and does not say, about representation convergence.</p>
     <div class="art-links">
       <a href="../index.html"><span class="icon"><i class="fas fa-arrow-left"></i></span><span>Project page</span></a>
       <a href="../index.html#explore"><span class="icon"><i class="fas fa-sliders"></i></span><span>Interactive figure</span></a>
@@ -82,8 +81,8 @@
     <h3>Contents</h3>
     <ol>
       <li><a href="#q">The question</a></li>
-      <li><a href="#platonic">The Platonic hope and a failure mode</a></li>
-      <li><a href="#partial">Convergence is partial and local</a></li>
+      <li><a href="#platonic">A strong invariance reading</a></li>
+      <li><a href="#partial">What recent PRH work changes</a></li>
       <li><a href="#measured">What we measured</a></li>
       <li><a href="#umwelt">An Umwelt reading</a></li>
       <li><a href="#matters">Why it matters</a></li>
@@ -92,8 +91,10 @@
     </ol>
   </nav>
 
-  <p class="pull">The word does not change; only its color does. A vision encoder still places it at a new
-    location in concept space.</p>
+  <p class="pull"><b>The claim.</b> This note is not a direct test of the Platonic Representation Hypothesis. I
+    use it as a lens for a narrower question: how much of the shared structure these models are said to converge
+    on is invariant to presentation? Color bias is not evidence against representation convergence in general. It
+    is evidence against a strong form of presentation invariance for text-as-image inputs.</p>
 
   <h2 id="q">1 · The question</h2>
   <p>In <a href="../index.html">Seeing Red, Thinking Bad</a> we render a sentence as an image and recolor one
@@ -117,37 +118,36 @@
       Real CLIP-ViT-L/14-336 measurements at the probe rendering.</figcaption>
   </figure>
 
-  <h2 id="platonic">2 · The Platonic hope and a failure mode</h2>
+  <h2 id="platonic">2 · A strong invariance reading</h2>
   <p>The <b>Platonic Representation Hypothesis</b>
     (<a href="https://arxiv.org/abs/2405.07987" target="_blank" rel="noopener">Huh, Cheung, Wang &amp; Isola, 2024</a>)
-    proposes that large models trained on different data, objectives, and modalities are converging toward a
-    shared statistical model of reality. In the cave metaphor, each modality is a different shadow of the same
-    object. On this view a word like <i>terrible</i> should occupy a fixed semantic location regardless of its
-    color.</p>
-  <p>Read against that hope, our result is a failure of invariance. A feature that should be lexically
-    irrelevant moves the representation. Color carries no propositional content here; it carries only learned
-    associations, and the encoder is demonstrably sensitive to it
+    argues that models trained with different data, objectives, and modalities may become increasingly aligned
+    in representation space. I do not read our result as a refutation of that hypothesis.</p>
+  <p>The narrower issue is presentation invariance. A strong reading of convergence would suggest that, once the
+    lexical content is fixed, incidental rendering choices such as hue should not substantially change where the
+    input lands along semantic directions. Our result is a <b>boundary case</b> against that expectation: for
+    text-as-image inputs, hue can move a rendered word along semantic directions while the string is unchanged.
+    Color carries no propositional content in our constructed sentence; it does not change the characters or the
+    truth-conditional meaning. It can, however, carry learned affective and cultural associations, and the
+    encoder is demonstrably sensitive to color
     (<a href="https://arxiv.org/abs/2502.04470" target="_blank" rel="noopener"><i>Color in Visual-Language Models: CLIP deficiencies</i></a>, 2025).
-    We read this as a <b>boundary case</b> for the strong, presentation-invariant form of the hypothesis, not a
-    refutation of it.</p>
+    That sensitivity is the point.</p>
 
-  <h2 id="partial">3 · Convergence is partial and local</h2>
-  <p>The strong, global form of the hypothesis is the part recent work questions, and that work indicates where
-    a surface feature can enter.</p>
-  <p><a href="https://arxiv.org/abs/2602.14486" target="_blank" rel="noopener">Gröger, Wen &amp; Brbić (2026)</a>,
-    in an Aristotelian revision, show that much apparent convergence under global similarity metrics such as CKA
-    is a scale-induced artifact: the score inflates with model width and depth. After null-calibration, what
-    survives is not a shared global geometry but agreement on <i>local</i> neighborhood structure, that is, which
-    items are nearest neighbors.
+  <h2 id="partial">3 · What recent PRH work changes</h2>
+  <p>Recent work makes the global form of convergence harder to maintain, and it indicates where a
+    presentation-level feature can enter.
+    <a href="https://arxiv.org/abs/2602.14486" target="_blank" rel="noopener">Gröger, Wen &amp; Brbić (2026)</a>
+    argue that global similarity scores can be inflated by model scale, and that after calibration the more
+    stable signal is local neighborhood agreement rather than a shared global geometry.
     <a href="https://arxiv.org/abs/2604.18572" target="_blank" rel="noopener">Koepke, Zverev, Ginosar &amp; Efros (2026)</a>
-    scale the original mutual-nearest-neighbor test to millions of samples. Alignment is fragile. It collapses at
-    scale and leaves only coarse semantic overlap, with models inhabiting modality-specific Umwelten rather than
-    one shared reality.
-    <a href="https://arxiv.org/abs/2503.05283" target="_blank" rel="noopener">Hadgi et al. (2025)</a> add that
-    where cross-modal convergence does appear, it lives in low-dimensional subspaces that can entangle
-    conceptually distinct axes.</p>
-  <p>The shared space, where it exists, is <b>partial, local, and low-dimensional</b>, rather than a single
-    global geometry. That is the kind of space in which a surface feature can re-rank a word's neighbors.</p>
+    scale the mutual-nearest-neighbor test to millions of samples and find that the apparent alignment becomes
+    fragile, leaving mostly coarse semantic overlap. Their result is compatible with an Umwelt-style reading, but
+    does not by itself study color or ecological niches.
+    <a href="https://arxiv.org/abs/2503.05283" target="_blank" rel="noopener">Hadgi et al. (2025)</a> find that
+    3D/text alignment improves only after projecting representations onto carefully chosen low-dimensional
+    subspaces, which appear to separate semantic and geometric factors.</p>
+  <p>None of these papers studies color. I use them only to locate our result: if convergence is partial and
+    local, then presentation-level variables may still affect the local geometry of rendered text.</p>
 
   <h2 id="measured">4 · What we measured</h2>
   <p>The probe is simple. We render a word $w$ in hue $h$ as an image $I_{w,h}$, encode it with a CLIP image
@@ -162,18 +162,19 @@
     <figcaption>Projections $s_a(w,h)$ for six probe words across hue, on four axes. Hue alone shifts them.</figcaption>
   </figure>
 
-  <p>Two results sharpen this. Color carries valence on its own: a blank color swatch projects more positive
-    when green than when red, so the encoder treats color as a semantic signal. But coloring a word is not the
+  <p>Two additional checks are useful. Color carries valence on its own: a blank color swatch projects more
+    positive when green than when red, so the encoder treats color as a semantic signal. But coloring a word is not the
     addition of that color vector. Writing $\Delta_w(h) = f(I_{w,h}) - \bar f_w$ for a word's hue-variation and
     $P_C$ for the projector onto the pure-color direction, the overlap is small:</p>
   $$ \rho_w = \frac{\lVert P_C\,\Delta_w \rVert^2}{\lVert \Delta_w \rVert^2} \approx 0.08. $$
   <p>Color largely reshapes how the specific word is represented, a color-by-word interaction. The hue
     trajectory itself is closed (cosine $\approx 0.99$ between $h{=}0$ and $h{=}360^\circ$) but spans roughly
-    four to six dimensions, so it does not reduce to a flat ring. The
-    <a href="../index.html#explore">interactive figure</a> lets you sweep $h$ and watch both panels move.</p>
+    four to six dimensions, so it does not reduce to a flat ring. These are diagnostic, single-setup
+    measurements on one CLIP encoder (ViT-L/14-336); the
+    <a href="../index.html#explore">interactive figure</a> shows the same sweep.</p>
 
   <h2 id="umwelt">5 · An Umwelt reading</h2>
-  <p>A second frame makes the effect expected rather than anomalous. The
+  <p>A second frame makes the effect less surprising. The
     <b>Umwelt Representation Hypothesis</b>
     (<a href="https://arxiv.org/abs/2604.17960" target="_blank" rel="noopener">Bosch, Sommers, Doerig &amp; Kietzmann, 2026</a>)
     argues that representational alignment reflects overlapping ecological constraints (environment, sensory
@@ -181,22 +182,22 @@
     cross-cultural color perception as evidence against universality. On this view the color-to-valence coupling
     is not a deviation from a Platonic ideal. It is a faithful imprint of CLIP's human-centric training data, in
     which color already carries learned affective and cultural meaning.</p>
-  <p>The two readings converge on the same conclusion. Under the Platonic lens the coupling is a failure of an
-    invariance that was assumed to hold. Under the Umwelt lens it is a property of a representation shaped by a
-    particular niche. Under both readings, a non-semantic property shifts a semantic judgment.</p>
+  <p>Both frames point to the same practical issue. Under a Platonic lens, the coupling marks a limit of
+    presentation invariance. Under an Umwelt lens, it is not a bug but an imprint of the training niche. Under
+    both, a non-semantic property shifts a semantic judgment.</p>
 
   <h2 id="matters">6 · Why it matters</h2>
-  <p>Both interpretations carry the same practical consequence: a <b>reliability and safety risk</b>. Pipelines
-    that read documents or interface screenshots can be influenced, benignly or adversarially, by styling that
-    changes no words. Reasonable mitigations include normalizing rendered text before inference, cross-checking
-    image-based answers against OCR-extracted text, and adding style-invariance checks to evaluation suites.</p>
+  <p>This is a <b>reliability and safety concern</b> for pipelines that read documents or interface screenshots:
+    styling that changes no words can still influence the output, benignly or adversarially. A simple check is to
+    compare the image-based answer with the answer from OCR-normalized text.</p>
 
   <h2 id="caveats">7 · Scope</h2>
-  <p>Two limits, stated once. CLIP is a diagnostic encoder, a stand-in for a converged representation, and the
-    $0.08$ overlap and four-to-six dimensions are our own within-CLIP measurements, read directionally since
-    absolute geometry can be scale-confounded (Gröger et al.). None of the convergence papers above studies
-    color: we borrow their account of <i>where</i> a shared space is imperfect, not evidence for color leakage.
-    The empirical claims live in the <a href="../index.html">paper</a>.</p>
+  <p>This note makes an interpretive claim, not a new theory of representation learning. The empirical claims
+    are those in the <a href="../index.html">paper</a>. CLIP is used only as a diagnostic vision-language
+    encoder: it is not evidence that all VLMs implement the same mechanism, nor that CLIP itself is a converged
+    representation. The additional measurements (the $0.08$ overlap and the four-to-six dimensions) are
+    diagnostic and model-specific. None of the convergence papers discussed here studies color bias; they
+    provide a vocabulary for partial, local, or niche-dependent alignment, not evidence for it.</p>
 
   <h2 id="refs">References</h2>
   <ol class="refs">
