@@ -159,7 +159,7 @@ Limitations include English-only stimuli, RGB-defined intensity levels, and the 
 - [ ] CLIP semantic-projection probe
 - [ ] Pre-rendered stimuli and result tables
 
-Stay tuned — code and data will land here.
+Code and data: coming soon (after cleanup).
 
 ---
 
@@ -172,7 +172,8 @@ If you find this work useful, please consider citing:
   title     = {Seeing Red, Thinking Bad: Color Bias in Vision Language Models},
   author    = {Ide, Kohsuke and Yamada, Ryousuke and Fukuhara, Yoshihiro and Kataoka, Hirokatsu and Satoh, Yutaka},
   booktitle = {Proceedings of the International Conference on Pattern Recognition (ICPR)},
-  year      = {2026}
+  year      = {2026},
+  note      = {To appear}
 }
 ```
 

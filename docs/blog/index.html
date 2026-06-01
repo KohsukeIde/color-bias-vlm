@@ -77,6 +77,17 @@
 
 <div class="art-wrap">
 
+  <nav class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#q">Observation</a></li>
+      <li><a href="#platonic">A PRH reading</a></li>
+      <li><a href="#measured">Diagnostic probe</a></li>
+      <li><a href="#umwelt">An Umwelt reading</a></li>
+      <li><a href="#caveats">Caveats and implications</a></li>
+    </ol>
+  </nav>
+
   <p class="pull"><b>The claim.</b> This note is not a direct test of the Platonic Representation Hypothesis. I
     use it as a lens for a narrower question: how much of the shared structure these models are said to converge
     on is invariant to presentation? Color bias is not evidence against representation convergence in general. It
@@ -170,18 +181,16 @@
     presentation invariance. Under an Umwelt lens, it is not a bug but an imprint of the training niche. Under
     both, a presentation-level variable enters a semantic decision.</p>
 
-  <h2 id="matters">Why it matters</h2>
-  <p>This is a <b>reliability and safety concern</b> for pipelines that read documents or interface screenshots:
-    styling that changes no words can still influence the output, benignly or adversarially. A simple check is to
-    compare the image-based answer with the answer from OCR-normalized text.</p>
-
-  <h2 id="caveats">Caveats</h2>
-  <p>This note makes an interpretive claim, not a new theory of representation learning. The empirical claims
-    are those in the <a href="../">paper</a>. CLIP is used only as a diagnostic vision-language
-    encoder: it is not evidence that all VLMs implement the same mechanism, nor that CLIP itself is a converged
-    representation. The additional measurements (the $0.08$ overlap and the four-to-six dimensions) are
-    diagnostic and model-specific. None of the convergence papers discussed here studies color bias; they
-    provide a vocabulary for partial, local, or niche-dependent alignment, not evidence for it.</p>
+  <h2 id="caveats">Caveats and implications</h2>
+  <p>For practice, the effect is a <b>reliability and safety concern</b>: pipelines that read documents or
+    interface screenshots can be influenced, benignly or adversarially, by styling that changes no words. A
+    simple first defense is to compare the image-based answer with the answer from OCR-normalized text.</p>
+  <p>On scope: this note makes an interpretive claim, not a new theory of representation learning. The empirical
+    claims are those in the <a href="../">paper</a>. CLIP is used only as a diagnostic vision-language encoder; it
+    is not a proxy for all VLM mechanisms, nor evidence that CLIP itself is a converged representation. The
+    $0.08$ overlap and the four-to-six dimensions are within-CLIP diagnostics, not main claims. None of the
+    convergence papers discussed here studies color bias; they provide a vocabulary for partial, local, or
+    niche-dependent alignment, not evidence for it.</p>
 
   <h2 id="refs">References</h2>
   <ol class="refs">
