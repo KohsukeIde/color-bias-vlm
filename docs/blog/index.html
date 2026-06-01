@@ -20,6 +20,10 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../static/css/index.css">
@@ -83,7 +87,7 @@
       <li><a href="#measured">What we measured</a></li>
       <li><a href="#umwelt">An Umwelt reading</a></li>
       <li><a href="#matters">Why it matters</a></li>
-      <li><a href="#caveats">Caveats</a></li>
+      <li><a href="#caveats">Scope</a></li>
       <li><a href="#refs">References</a></li>
     </ol>
   </nav>
@@ -121,13 +125,11 @@
     object. On this view a word like <i>terrible</i> should occupy a fixed semantic location regardless of its
     color.</p>
   <p>Read against that hope, our result is a failure of invariance. A feature that should be lexically
-    irrelevant moves the representation. Color carries no propositional content here. It carries only learned
+    irrelevant moves the representation. Color carries no propositional content here; it carries only learned
     associations, and the encoder is demonstrably sensitive to it
     (<a href="https://arxiv.org/abs/2502.04470" target="_blank" rel="noopener"><i>Color in Visual-Language Models: CLIP deficiencies</i></a>, 2025).
-    We state the scope carefully. This is a <b>boundary case</b> for the strong, presentation-invariant reading
-    of the hypothesis, not a direct test or refutation of it. The paper does not measure cross-model
-    convergence. It shows that for text-as-image, presentation-level variables enter the representation even when
-    the string is fixed.</p>
+    We read this as a <b>boundary case</b> for the strong, presentation-invariant form of the hypothesis, not a
+    refutation of it.</p>
 
   <h2 id="partial">3 · Convergence is partial and local</h2>
   <p>The strong, global form of the hypothesis is the part recent work questions, and that work indicates where
@@ -148,18 +150,27 @@
     global geometry. That is the kind of space in which a surface feature can re-rank a word's neighbors.</p>
 
   <h2 id="measured">4 · What we measured</h2>
-  <p>Our probe is consistent with this account. We report it as a measurement within CLIP's embedding space,
-    read directionally rather than as a universal magnitude, since global geometric quantities can be
-    scale-confounded (Gröger et al.).</p>
-  <p>We find three things. First, color carries valence on its own. A plain color swatch with no word projects
-    more positive and more safe when green than when red, which indicates that the encoder treats color as a
-    semantic signal. Second, coloring a word is not the addition of that color vector. A word's hue-driven
-    movement overlaps the pure-color direction by only about 8%, so color largely reshapes how that particular
-    word is represented. This is a color-by-word interaction. Third, the hue trajectory is closed but not
-    planar. Sweeping hue from 0 to 360° returns to its start (cosine ≈ 0.99) while spanning roughly 4 to 6
-    effective dimensions. The trajectory does not reduce to a flat ring, which is consistent with a coarsely
-    shared rather than a canonical low-dimensional representation. The
-    <a href="../index.html#explore">interactive figure</a> lets you sweep the hue and inspect both panels.</p>
+  <p>The probe is simple. We render a word $w$ in hue $h$ as an image $I_{w,h}$, encode it with a CLIP image
+    encoder $f$, and project onto a bipolar semantic axis $u_a$ built from CLIP text embeddings $g$:</p>
+  $$ s_a(w,h) = \big\langle f(I_{w,h}),\, u_a \big\rangle, \qquad
+     u_a = \frac{g(\text{pos}) - g(\text{neg})}{\lVert g(\text{pos}) - g(\text{neg})\rVert}. $$
+  <p>For valence, $(\text{pos},\text{neg}) = (\text{good},\text{bad})$. The string $w$ is fixed and only $h$
+    varies, yet $s_a(w,h)$ moves systematically with hue.</p>
+
+  <figure>
+    <img src="../static/images/a2_hue_tuning_curves_v2.png" alt="Semantic-axis projections as a function of hue">
+    <figcaption>Projections $s_a(w,h)$ for six probe words across hue, on four axes. Hue alone shifts them.</figcaption>
+  </figure>
+
+  <p>Two results sharpen this. Color carries valence on its own: a blank color swatch projects more positive
+    when green than when red, so the encoder treats color as a semantic signal. But coloring a word is not the
+    addition of that color vector. Writing $\Delta_w(h) = f(I_{w,h}) - \bar f_w$ for a word's hue-variation and
+    $P_C$ for the projector onto the pure-color direction, the overlap is small:</p>
+  $$ \rho_w = \frac{\lVert P_C\,\Delta_w \rVert^2}{\lVert \Delta_w \rVert^2} \approx 0.08. $$
+  <p>Color largely reshapes how the specific word is represented, a color-by-word interaction. The hue
+    trajectory itself is closed (cosine $\approx 0.99$ between $h{=}0$ and $h{=}360^\circ$) but spans roughly
+    four to six dimensions, so it does not reduce to a flat ring. The
+    <a href="../index.html#explore">interactive figure</a> lets you sweep $h$ and watch both panels move.</p>
 
   <h2 id="umwelt">5 · An Umwelt reading</h2>
   <p>A second frame makes the effect expected rather than anomalous. The
@@ -180,14 +191,12 @@
     changes no words. Reasonable mitigations include normalizing rendered text before inference, cross-checking
     image-based answers against OCR-extracted text, and adding style-invariance checks to evaluation suites.</p>
 
-  <h2 id="caveats">7 · Caveats</h2>
-  <p>We use these hypotheses as interpretive lenses, not proofs. CLIP is a diagnostic encoder, a stand-in for a
-    converged representation rather than the universal Platonic form. The ~8% overlap and the 4-to-6-dimensional
-    loop are our own measurements within CLIP's embedding space, read directionally. "Green is positive" is a
-    learned, culturally contingent association that we measure, not an innate ideal. None of the four convergence
-    papers studies color. We cite them for the convergence-measurement caveat and for the local and
-    niche-specific reframing of the hypothesis, not as evidence for color leakage itself. This page is an
-    interpretive companion. The empirical claims live in the paper. (Version 0.1, to be expanded.)</p>
+  <h2 id="caveats">7 · Scope</h2>
+  <p>Two limits, stated once. CLIP is a diagnostic encoder, a stand-in for a converged representation, and the
+    $0.08$ overlap and four-to-six dimensions are our own within-CLIP measurements, read directionally since
+    absolute geometry can be scale-confounded (Gröger et al.). None of the convergence papers above studies
+    color: we borrow their account of <i>where</i> a shared space is imperfect, not evidence for color leakage.
+    The empirical claims live in the <a href="../index.html">paper</a>.</p>
 
   <h2 id="refs">References</h2>
   <ol class="refs">
