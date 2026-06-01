@@ -249,28 +249,18 @@
 <!-- ============ PLATONIC READING (interpretive companion, beyond the paper) ============ -->
 <section class="section alt">
   <div class="container narrow">
-    <h2 class="title is-4 sec-title">A Platonic &mdash; and Umwelt &mdash; reading</h2>
-    <p class="small">Beyond the paper &mdash; an interpretive companion, not part of the paper itself.</p>
-    <figure class="mt">
-      <img src="./static/images/teaser_concept.png" alt="A biased shadow on the wall: recoloring shifts valence">
+    <h2 class="title is-4 sec-title">Beyond the paper</h2>
+    <figure>
+      <img src="./static/images/teaser_concept.png" alt="Recoloring a word shifts its valence projection in CLIP">
       <figcaption>The same token <span class="mono">"terrible"</span> in black vs. green text is encoded with a
-        different valence projection — red is most negative, green nudges it toward positive — even though
-        the string is unchanged. Values are real CLIP measurements at the probe rendering.</figcaption>
+        different valence projection — red is most negative, green the most positive — even though the string is
+        unchanged. Real CLIP measurements at the probe rendering.</figcaption>
     </figure>
     <p class="body-text mt">
-      Why should a presentation-level feature like color move a semantic judgment? One reading is through the
-      <b>Platonic Representation Hypothesis</b>
-      (<a href="https://arxiv.org/abs/2405.07987" target="_blank" rel="noopener">Huh&nbsp;et&nbsp;al., 2024</a>):
-      if encoders converge toward a shared concept space, color leakage is a <i>failure mode</i> of that
-      convergence &mdash; a <i>boundary case</i> for its strong, presentation-invariant reading, not a refutation.
-      That strong, global form is itself contested &mdash; recent work argues
-      convergence is partial, local, and niche-shaped &mdash; and under the
-      <b>Umwelt Representation Hypothesis</b> the same color&nbsp;&rarr;&nbsp;valence coupling is instead a
-      <i>predicted</i> imprint of CLIP's human-centric training. Either way, surface appearance steers meaning.
-    </p>
-    <p class="body-text">
-      <b><a href="./blog/">Read the full interpretive companion &rarr;</a></b>
-      &nbsp;<span class="small">— a Platonic / Aristotelian / Umwelt reading, with references and caveats.</span>
+      Recoloring a word, with the string fixed, still shifts where a vision encoder places it. A companion note
+      reads this through the representational-convergence debate (the Platonic and Umwelt hypotheses), as an
+      interpretation rather than a paper claim.
+      <b><a href="./blog/">Read the blog &rarr;</a></b>
     </p>
   </div>
 </section>

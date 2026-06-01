@@ -77,26 +77,12 @@
 
 <div class="art-wrap">
 
-  <nav class="toc">
-    <h3>Contents</h3>
-    <ol>
-      <li><a href="#q">The question</a></li>
-      <li><a href="#platonic">A strong invariance reading</a></li>
-      <li><a href="#partial">What recent PRH work changes</a></li>
-      <li><a href="#measured">What we measured</a></li>
-      <li><a href="#umwelt">An Umwelt reading</a></li>
-      <li><a href="#matters">Why it matters</a></li>
-      <li><a href="#caveats">Scope</a></li>
-      <li><a href="#refs">References</a></li>
-    </ol>
-  </nav>
-
   <p class="pull"><b>The claim.</b> This note is not a direct test of the Platonic Representation Hypothesis. I
     use it as a lens for a narrower question: how much of the shared structure these models are said to converge
     on is invariant to presentation? Color bias is not evidence against representation convergence in general. It
     is evidence against a strong form of presentation invariance for text-as-image inputs.</p>
 
-  <h2 id="q">1 · The question</h2>
+  <h2 id="q">Observation</h2>
   <p>In <a href="../index.html">Seeing Red, Thinking Bad</a> we render a sentence as an image and recolor one
     word (e.g., turning <i>excellent</i> green) without altering a single character. The string is identical;
     only the visual styling differs. Vision language models still shift their sentiment judgment, and a CLIP
@@ -118,7 +104,7 @@
       Real CLIP-ViT-L/14-336 measurements at the probe rendering.</figcaption>
   </figure>
 
-  <h2 id="platonic">2 · A strong invariance reading</h2>
+  <h2 id="platonic">A PRH reading</h2>
   <p>The <b>Platonic Representation Hypothesis</b>
     (<a href="https://arxiv.org/abs/2405.07987" target="_blank" rel="noopener">Huh, Cheung, Wang &amp; Isola, 2024</a>)
     argues that models trained with different data, objectives, and modalities may become increasingly aligned
@@ -132,9 +118,7 @@
     encoder is demonstrably sensitive to color
     (<a href="https://arxiv.org/abs/2502.04470" target="_blank" rel="noopener"><i>Color in Visual-Language Models: CLIP deficiencies</i></a>, 2025).
     That sensitivity is the point.</p>
-
-  <h2 id="partial">3 · What recent PRH work changes</h2>
-  <p>Recent work makes the global form of convergence harder to maintain, and it indicates where a
+  <p>Recent work also makes the global form of convergence harder to maintain, and it indicates where a
     presentation-level feature can enter.
     <a href="https://arxiv.org/abs/2602.14486" target="_blank" rel="noopener">Gröger, Wen &amp; Brbić (2026)</a>
     argue that global similarity scores can be inflated by model scale, and that after calibration the more
@@ -149,7 +133,7 @@
   <p>None of these papers studies color. I use them only to locate our result: if convergence is partial and
     local, then presentation-level variables may still affect the local geometry of rendered text.</p>
 
-  <h2 id="measured">4 · What we measured</h2>
+  <h2 id="measured">Diagnostic probe</h2>
   <p>The probe is simple. We render a word $w$ in hue $h$ as an image $I_{w,h}$, encode it with a CLIP image
     encoder $f$, and project onto a bipolar semantic axis $u_a$ built from CLIP text embeddings $g$:</p>
   $$ s_a(w,h) = \big\langle f(I_{w,h}),\, u_a \big\rangle, \qquad
@@ -162,18 +146,18 @@
     <figcaption>Projections $s_a(w,h)$ for six probe words across hue, on four axes. Hue alone shifts them.</figcaption>
   </figure>
 
-  <p>Two additional checks are useful. Color carries valence on its own: a blank color swatch projects more
-    positive when green than when red, so the encoder treats color as a semantic signal. But coloring a word is not the
-    addition of that color vector. Writing $\Delta_w(h) = f(I_{w,h}) - \bar f_w$ for a word's hue-variation and
-    $P_C$ for the projector onto the pure-color direction, the overlap is small:</p>
+  <p>The next two checks are small within-CLIP diagnostics, not part of the paper's main claims; they help read
+    the interactive figure. First, color carries valence on its own: a blank color swatch projects more positive
+    when green than when red, so the encoder treats color as a semantic signal. Second, coloring a word is not
+    the addition of that color vector. Writing $\Delta_w(h) = f(I_{w,h}) - \bar f_w$ for a word's hue-variation
+    and $P_C$ for the projector onto the pure-color direction, the overlap is small:</p>
   $$ \rho_w = \frac{\lVert P_C\,\Delta_w \rVert^2}{\lVert \Delta_w \rVert^2} \approx 0.08. $$
   <p>Color largely reshapes how the specific word is represented, a color-by-word interaction. The hue
-    trajectory itself is closed (cosine $\approx 0.99$ between $h{=}0$ and $h{=}360^\circ$) but spans roughly
-    four to six dimensions, so it does not reduce to a flat ring. These are diagnostic, single-setup
-    measurements on one CLIP encoder (ViT-L/14-336); the
-    <a href="../index.html#explore">interactive figure</a> shows the same sweep.</p>
+    trajectory is closed (cosine $\approx 0.99$ between $h{=}0$ and $h{=}360^\circ$) but spans roughly four to six
+    dimensions, so it does not reduce to a flat ring. The
+    <a href="../index.html#explore">interactive figure</a> shows the same sweep (CLIP ViT-L/14-336).</p>
 
-  <h2 id="umwelt">5 · An Umwelt reading</h2>
+  <h2 id="umwelt">An Umwelt reading</h2>
   <p>A second frame makes the effect less surprising. The
     <b>Umwelt Representation Hypothesis</b>
     (<a href="https://arxiv.org/abs/2604.17960" target="_blank" rel="noopener">Bosch, Sommers, Doerig &amp; Kietzmann, 2026</a>)
@@ -184,14 +168,14 @@
     which color already carries learned affective and cultural meaning.</p>
   <p>Both frames point to the same practical issue. Under a Platonic lens, the coupling marks a limit of
     presentation invariance. Under an Umwelt lens, it is not a bug but an imprint of the training niche. Under
-    both, a non-semantic property shifts a semantic judgment.</p>
+    both, a presentation-level variable enters a semantic decision.</p>
 
-  <h2 id="matters">6 · Why it matters</h2>
+  <h2 id="matters">Why it matters</h2>
   <p>This is a <b>reliability and safety concern</b> for pipelines that read documents or interface screenshots:
     styling that changes no words can still influence the output, benignly or adversarially. A simple check is to
     compare the image-based answer with the answer from OCR-normalized text.</p>
 
-  <h2 id="caveats">7 · Scope</h2>
+  <h2 id="caveats">Caveats</h2>
   <p>This note makes an interpretive claim, not a new theory of representation learning. The empirical claims
     are those in the <a href="../index.html">paper</a>. CLIP is used only as a diagnostic vision-language
     encoder: it is not evidence that all VLMs implement the same mechanism, nor that CLIP itself is a converged
@@ -222,7 +206,7 @@
     <li><span class="ref-tag">Color in Visual-Language Models: CLIP Deficiencies (2025).</span>
       <a href="https://arxiv.org/abs/2502.04470" target="_blank" rel="noopener">arXiv:2502.04470</a>.</li>
     <li><span class="ref-tag">Ide, Yamada, Fukuhara, Kataoka &amp; Satoh (2026).</span> Seeing Red, Thinking Bad:
-      Color Bias in Vision Language Models. ICPR 2026.
+      Color Bias in Vision Language Models. ICPR 2026, to appear.
       <a href="https://kohsukeide.github.io/color-bias-vlm/" target="_blank" rel="noopener">Project page</a>.</li>
   </ol>
 </div>
