@@ -1,0 +1,42 @@
+# Core
+torch>=2.2.0
+torchvision>=0.17.0
+transformers>=4.42.0
+accelerate>=0.30.0
+safetensors>=0.4.2
+
+# Data & utils
+datasets>=2.20.0
+numpy>=1.24.0
+pillow>=10.2.0
+opencv-python-headless>=4.9.0.80
+scipy>=1.11.0
+scikit-learn>=1.4.0
+
+# NLP/vision extras
+sentencepiece>=0.1.99
+protobuf>=3.20.3
+regex>=2024.5.15
+
+# Visualization & analysis
+pandas>=2.2.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+tqdm>=4.66.0
+
+# Optional (commonly needed by VLMs)
+timm>=0.9.16
+einops>=0.7.0
+open_clip_torch>=2.24.0
+qwen-vl-utils>=0.0.8
+
+
+
+
+
+
+
+
+
+
+

@@ -102,10 +102,10 @@
     probe shows that sweeping a rendered word's hue moves its image embedding along interpretable semantic axes
     (valence, safety, emotion). The encoder treats color as an informative feature, although color carries no
     propositional meaning here.</p>
-  <p>This is not specific to one model. Cross-modal inconsistency is documented: vision language models answer
+  <p>Related work has also documented cross-modal inconsistency: vision language models can answer
     the same content differently when it is presented as text tokens versus as text rendered inside an image
     (<a href="https://arxiv.org/abs/2411.09273" target="_blank" rel="noopener"><i>Cross-Modal Consistency in MLLMs</i></a>, 2024;
-    <a href="https://arxiv.org/abs/2512.08923" target="_blank" rel="noopener"><i>Same Content, Different Answers</i></a>, 2025).
+    <a href="https://arxiv.org/abs/2512.08923" target="_blank" rel="noopener"><i>Same Content, Different Answers</i></a>, CVPR 2026; arXiv 2025).
     The question we ask is narrower. If independently trained encoders are thought to converge on a shared,
     abstract account of the world, what does it mean that a presentation-level feature enters that account? We
     read our finding through the current debate on <b>representational convergence</b>.</p>
@@ -113,8 +113,8 @@
   <figure>
     <img src="../static/images/teaser_concept.png" alt="Recoloring a word shifts its valence projection in CLIP">
     <figcaption>The token <span class="mono">"bad"</span> in black and in green text lands at a different valence
-      projection. Across the six canonical hues, red is the most negative and green the most positive, even though
-      the string is unchanged. Real CLIP-ViT-L/14-336 measurements.</figcaption>
+      projection in this diagnostic probe. Across the six canonical hues, the projection changes even though the
+      string is unchanged. CLIP-ViT-L/14-336 measurements for the interactive companion.</figcaption>
   </figure>
 
   <h2 id="platonic">A PRH reading</h2>
@@ -129,7 +129,7 @@
     Color carries no propositional content in our constructed sentence; it does not change the characters or the
     truth-conditional meaning. It can, however, carry learned affective and cultural associations, and the
     encoder is demonstrably sensitive to color
-    (<a href="https://arxiv.org/abs/2502.04470" target="_blank" rel="noopener"><i>Color in Visual-Language Models: CLIP deficiencies</i></a>, 2025).
+    (<a href="https://arxiv.org/abs/2502.04470" target="_blank" rel="noopener"><i>Color in Visual-Language Models: CLIP deficiencies</i></a>, CIC 2024; arXiv 2025).
     That sensitivity is the point.</p>
   <p>Recent work also makes the global form of convergence harder to maintain, and it indicates where a
     presentation-level feature can enter.
@@ -177,7 +177,7 @@
     argues that representational alignment reflects overlapping ecological constraints (environment, sensory
     apparatus, training statistics, objectives) rather than recovery of one global optimum. It cites
     cross-cultural color perception as evidence against universality. On this view the color-to-valence coupling
-    is not a deviation from a Platonic ideal. It is a faithful imprint of CLIP's human-centric training data, in
+    is not a deviation from a Platonic ideal. It may reflect CLIP's human-centric training data, in
     which color already carries learned affective and cultural meaning.</p>
   <p>Both frames point to the same practical issue. Under a Platonic lens, the coupling marks a limit of
     presentation invariance. Under an Umwelt lens, it is not a bug but an imprint of the training niche. Under
@@ -214,12 +214,12 @@
       <a href="https://arxiv.org/abs/2604.17960" target="_blank" rel="noopener">arXiv:2604.17960</a>.</li>
     <li><span class="ref-tag">Cross-Modal Consistency in Multimodal Large Language Models (2024).</span>
       <a href="https://arxiv.org/abs/2411.09273" target="_blank" rel="noopener">arXiv:2411.09273</a>.</li>
-    <li><span class="ref-tag">Same Content, Different Answers: Cross-Modal Inconsistency in MLLMs (2025).</span>
+    <li><span class="ref-tag">Same Content, Different Answers: Cross-Modal Inconsistency in MLLMs (CVPR 2026; arXiv 2025).</span>
       <a href="https://arxiv.org/abs/2512.08923" target="_blank" rel="noopener">arXiv:2512.08923</a>.</li>
-    <li><span class="ref-tag">Color in Visual-Language Models: CLIP Deficiencies (2025).</span>
+    <li><span class="ref-tag">Color in Visual-Language Models: CLIP Deficiencies (CIC 2024; arXiv 2025).</span>
       <a href="https://arxiv.org/abs/2502.04470" target="_blank" rel="noopener">arXiv:2502.04470</a>.</li>
     <li><span class="ref-tag">Ide, Yamada, Fukuhara, Kataoka &amp; Satoh (2026).</span> Seeing Red, Thinking Bad:
-      Color Bias in Vision Language Models. ICPR 2026, to appear.
+      Color Bias in Vision Language Models. Manuscript and project page.
       <a href="https://kohsukeide.github.io/color-bias-vlm/" target="_blank" rel="noopener">Project page</a>.</li>
   </ol>
 </div>
@@ -228,7 +228,7 @@
 
 <footer class="footer-mini">
   <div class="container">
-    <p class="dim">An interpretive companion to "Seeing Red, Thinking Bad: Color Bias in Vision Language Models" (ICPR 2026).</p>
+    <p class="dim">An interpretive companion to "Seeing Red, Thinking Bad: Color Bias in Vision Language Models".</p>
   </div>
 </footer>
 

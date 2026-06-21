@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Seeing Red, Thinking Bad: Color Bias in Vision Language Models</title>
-  <meta name="description" content="Stealth Visual Prompts: subtle color and contrast styling of rendered text systematically biases vision language models. ICPR 2026.">
+  <meta name="description" content="Stealth Visual Prompts: subtle color and contrast styling of rendered text can systematically bias vision language models.">
   <meta property="og:title" content="Seeing Red, Thinking Bad: Color Bias in Vision Language Models">
   <meta property="og:description" content="Recoloring a word shifts a VLM's judgment — explore an interactive hue sweep of CLIP embeddings.">
   <meta property="og:image" content="./static/images/fig1-v4.png">
@@ -35,7 +35,7 @@
 <!-- ===================== HERO ===================== -->
 <section class="hero-head">
   <div class="container">
-    <span class="venue-badge">ICPR&nbsp;2026</span>
+    <span class="venue-badge">Project&nbsp;page</span>
     <h1 class="paper-title">Seeing Red, Thinking Bad:<br>Color Bias in Vision Language Models</h1>
 
     <p class="authors">
@@ -54,9 +54,8 @@
     <p class="corresp">✉ <a href="mailto:ide.agi@aist.go.jp">ide.agi@aist.go.jp</a></p>
 
     <div class="link-buttons">
-      <!-- TODO: replace href with the hosted paper / arXiv URL when available -->
-      <a class="lbtn" href="https://github.com/KohsukeIde/color-bias-vlm" target="_blank" rel="noopener">
-        <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper</span></a>
+      <a class="lbtn" href="#bibtex">
+        <span class="icon"><i class="fas fa-file-alt"></i></span><span>Manuscript</span></a>
       <a class="lbtn" href="https://github.com/KohsukeIde/color-bias-vlm" target="_blank" rel="noopener">
         <span class="icon"><i class="fab fa-github"></i></span><span>Code</span></a>
       <a class="lbtn" href="./blog/">
@@ -253,8 +252,8 @@
     <figure>
       <img src="./static/images/teaser_concept.png" alt="Recoloring a word shifts its valence projection in CLIP">
       <figcaption>The same token <span class="mono">"bad"</span> in black vs. green text is encoded with a
-        different valence projection: across the six canonical hues, red is the most negative and green the most
-        positive, even though the string is unchanged. Real CLIP-ViT-L/14-336 measurements.</figcaption>
+        different valence projection in this diagnostic probe. Across the six canonical hues, the projection
+        changes even though the string is unchanged. CLIP-ViT-L/14-336 measurements for the interactive companion.</figcaption>
     </figure>
     <p class="body-text mt">
       Recoloring a word, with the string fixed, still shifts where a vision encoder places it. A companion note
@@ -273,9 +272,9 @@
   title     = {Seeing Red, Thinking Bad: Color Bias in Vision Language Models},
   author    = {Ide, Kohsuke and Yamada, Ryousuke and Fukuhara, Yoshihiro
                and Kataoka, Hirokatsu and Satoh, Yutaka},
-  booktitle = {Proceedings of the International Conference on Pattern Recognition (ICPR)},
-  year      = {2026},
-  note      = {To appear}
+  year         = {2026},
+  howpublished = {Manuscript},
+  url          = {https://github.com/KohsukeIde/color-bias-vlm}
 }</pre>
   </div>
 </section>
@@ -284,7 +283,7 @@
   <div class="container">
     <p>Supported by the AIST policy-based budget project "R&amp;D on Generative AI Foundation Models for the
       Physical Domain". Computation used ABCI 3.0.</p>
-    <p class="dim">Page built with Bulma &amp; D3. Interactive figure uses real CLIP-ViT-L/14-336 measurements.
+    <p class="dim">Page built with Bulma &amp; D3. Interactive figure uses CLIP-ViT-L/14-336 companion measurements, not an additional main-paper claim.
       Template aesthetic after the Nerfies academic project page.</p>
   </div>
 </footer>

@@ -1,11 +1,10 @@
 # Seeing Red, Thinking Bad: Color Bias in Vision Language Models
 
-[![Venue](https://img.shields.io/badge/ICPR-2026-1f6feb)](https://icpr2026.org/)
 [![Project page](https://img.shields.io/badge/🌐_Project_page-color--bias--vlm-3a4a8c)](https://kohsukeide.github.io/color-bias-vlm/)
 
 > **🌐 Interactive project page:** https://kohsukeide.github.io/color-bias-vlm/ — sweep a word's text hue and watch its CLIP embedding move.
 >
-> **Project page** for *Seeing Red, Thinking Bad: Color Bias in Vision Language Models*, **ICPR 2026**.
+> **Project page** for *Seeing Red, Thinking Bad: Color Bias in Vision Language Models*.
 >
 > Kohsuke Ide, Ryousuke Yamada, Yoshihiro Fukuhara, Hirokatsu Kataoka, Yutaka Satoh.
 >
@@ -21,13 +20,13 @@
 
 ## TL;DR
 
-Vision Language Models (VLMs) are not invariant to the **visual form** in which text is rendered. We introduce **Stealth Visual Prompts** — semantics-preserving changes to the visual rendering of text (color, contrast) — and show that they systematically bias VLM outputs:
+Vision Language Models (VLMs) are not always invariant to the **visual form** in which text is rendered. We introduce **Stealth Visual Prompts** — semantics-preserving changes to the visual rendering of text (color, contrast) — and show that they can systematically bias VLM outputs:
 
-- **Color** acts as an *implicit semantic control channel*. Coloring positive words green pushes sentiment predictions toward POSITIVE, even when the sentence also contains explicit negative words.
-- **Contrast** acts as an *accessibility gate*. Reducing text–background contrast makes models rely more on visually salient cues, increasing decoy-driven errors in VQA.
-- These behavioral effects correlate with shifts in the vision encoder's latent representations: sweeping the hue of a rendered word shifts CLIP image embeddings along human-interpretable semantic axes (valence, emotion, …) even though the rendered word string is unchanged.
+- **Color** can act as an *implicit semantic control channel*. In our short-sentence sentiment set, coloring positive words green shifts sentiment predictions toward POSITIVE, even when the sentence also contains explicit negative words.
+- **Contrast** acts as an *accessibility gate*. Reducing text–background contrast can make several models rely more on visually salient cues, increasing decoy-driven errors in VQA.
+- These behavioral effects are consistent with diagnostic shifts in vision-encoder representations: sweeping the hue of a rendered word shifts CLIP image embeddings along human-interpretable semantic axes (valence, emotion, safety, temperature) even though the rendered word string is unchanged.
 
-> Code and data will be released in this repository. This page currently hosts the project description; an implementation drop will follow.
+> Code for stimulus generation, VLM evaluation, CLIP probes, and visualization is included. Large generated datasets and raw model outputs are not committed to the repository.
 
 ---
 
@@ -154,12 +153,13 @@ Limitations include English-only stimuli, RGB-defined intensity levels, and the 
 ## Repository status
 
 - [x] Project page (this README)
-- [ ] Stealth Prompt Testset generation scripts
-- [ ] VLM evaluation pipeline (sentiment / VQA / OCR proxy)
-- [ ] CLIP semantic-projection probe
-- [ ] Pre-rendered stimuli and result tables
+- [x] Stealth Prompt Testset generation scripts
+- [x] VLM evaluation pipeline (sentiment / VQA / OCR proxy)
+- [x] CLIP semantic-projection probe
+- [x] Visualization scripts for the reported figures
+- [ ] Pre-rendered full stimuli and raw result tables
 
-Code and data: coming soon (after cleanup).
+Large generated stimuli, SQuAD-derived artifacts, and raw VLM outputs are intentionally excluded from Git history. Regenerate them with the scripts under `src/`, `experiments/`, and `scripts/`.
 
 ---
 
@@ -171,9 +171,9 @@ If you find this work useful, please consider citing:
 @inproceedings{ide2026seeingred,
   title     = {Seeing Red, Thinking Bad: Color Bias in Vision Language Models},
   author    = {Ide, Kohsuke and Yamada, Ryousuke and Fukuhara, Yoshihiro and Kataoka, Hirokatsu and Satoh, Yutaka},
-  booktitle = {Proceedings of the International Conference on Pattern Recognition (ICPR)},
-  year      = {2026},
-  note      = {To appear}
+  year         = {2026},
+  howpublished = {Manuscript},
+  url          = {https://github.com/KohsukeIde/color-bias-vlm}
 }
 ```
 

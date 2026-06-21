@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Environments
+.venv/
+venv/
+venv_mac/
+env/
+ENV/
+.env
+.env.*
+
+# Local OS/editor files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Large/generated experiment artifacts
+data/
+results/
+logs/
+outputs/
+runs/
+wandb/
+checkpoints/
+*.log
+*.pt
+*.pth
+*.safetensors
+*.npy
+*.npz
+*.parquet
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.out
+*.toc
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
