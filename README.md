@@ -1,186 +1,168 @@
 # Seeing Red, Thinking Bad: Color Bias in Vision Language Models
 
-[![Project page](https://img.shields.io/badge/🌐_Project_page-color--bias--vlm-3a4a8c)](https://kohsukeide.github.io/color-bias-vlm/)
+[![Project page](https://img.shields.io/badge/Project_page-color--bias--vlm-3a4a8c)](https://kohsukeide.github.io/color-bias-vlm/)
 
-> **🌐 Interactive project page:** https://kohsukeide.github.io/color-bias-vlm/ — sweep a word's text hue and watch its CLIP embedding move.
->
-> **Project page** for *Seeing Red, Thinking Bad: Color Bias in Vision Language Models*.
->
-> Kohsuke Ide, Ryousuke Yamada, Yoshihiro Fukuhara, Hirokatsu Kataoka, Yutaka Satoh.
->
-> National Institute of Advanced Industrial Science and Technology (AIST) · University of Tsukuba · University of Technology Nuremberg · University of Oxford.
+Code release for **Seeing Red, Thinking Bad: Color Bias in Vision Language Models**.
+
+This repository provides scripts for generating rendered-text stimuli, running VLM evaluations, analyzing color/contrast effects, and recreating the main figures used in the project page.
 
 <p align="center">
   <img src="assets/fig1-v4.png" alt="Stealth Visual Prompts concept figure" width="80%">
 </p>
 
-<p align="center"><em>Subtle visual styling biases VLM outputs. Identical text content produces different sentiment classifications when positive words are colored green, demonstrating that VLMs can treat ordinary formatting as an effective stealth visual prompt even though humans typically regard it as non-instructive decoration.</em></p>
+## What Is Included
 
----
+- Text-as-image stimulus generation for color and contrast manipulations
+- VLM evaluation scripts for sentiment classification and VQA-style answering
+- CLIP/SigLIP-style probing utilities for representation analysis
+- OCR/readability and SQuAD-style evaluation helpers
+- Figure-generation scripts for the project page and paper figures
 
-## TL;DR
+For a visual summary of the paper and interactive hue-sweep demo, see the [project page](https://kohsukeide.github.io/color-bias-vlm/).
 
-Vision Language Models (VLMs) are not always invariant to the **visual form** in which text is rendered. We introduce **Stealth Visual Prompts** — semantics-preserving changes to the visual rendering of text (color, contrast) — and show that they can systematically bias VLM outputs:
+## Setup
 
-- **Color** can act as an *implicit semantic control channel*. In our short-sentence sentiment set, coloring positive words green shifts sentiment predictions toward POSITIVE, even when the sentence also contains explicit negative words.
-- **Contrast** acts as an *accessibility gate*. Reducing text–background contrast can make several models rely more on visually salient cues, increasing decoy-driven errors in VQA.
-- These behavioral effects are consistent with diagnostic shifts in vision-encoder representations: sweeping the hue of a rendered word shifts CLIP image embeddings along human-interpretable semantic axes (valence, emotion, safety, temperature) even though the rendered word string is unchanged.
+Create an environment and install dependencies:
 
-> Code for stimulus generation, VLM evaluation, CLIP probes, and visualization is included. Large generated datasets and raw model outputs are not committed to the repository.
+```bash
+git clone https://github.com/KohsukeIde/color-bias-vlm.git
+cd color-bias-vlm
 
----
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-## Stealth Visual Prompts
+GPU execution is recommended for VLM inference. CPU is sufficient for many data-generation and analysis utilities.
 
-A **Stealth Visual Prompt** is a controlled perturbation applied to the visual rendering of text while keeping the underlying string content fixed. The goal is to introduce variations that humans typically perceive as ordinary formatting (emphasis, readability) rather than explicit instructions.
+## Quick Start
 
-We focus on two complementary attributes:
+### 1. Generate Color Stimuli
 
-- **Color** — recolors a predefined subset of words (e.g., sentiment-bearing words) using six canonical hues (red, green, blue, yellow, cyan, magenta) at three discrete intensity levels (subtle / mild / strong).
-- **Contrast** — reduces text–background contrast by rendering text in low-contrast grayscale on a white background. We further consider a *Saliency Competition* setting in which one selected span is rendered in high-contrast black while the rest of the text is low-contrast.
+Generate a small custom short-sentence sentiment set:
 
-All text is rendered onto an 800×600 canvas with a white background using DroidSans with anti-aliasing.
+```bash
+python src/data_generation/color/generate_by_color.py \
+  --datasets custom_short \
+  --n-samples 10 \
+  --output-root data/processed/color
+```
 
-<p align="center">
-  <img src="assets/stimuli_examples_v2.png" alt="Examples of stealth visual prompts" width="92%">
-</p>
+Generate long structured sentiment texts:
 
-<p align="center"><em>Examples of the generated visual stimuli. (a) Mixed-sentiment text used in the Color Axis experiment. (b) Structurally separated long text. (c) A stimulus from the Saliency Competition (Contrast Axis), where the semantically incorrect decoy ("twenty-miles") is made visually salient with high contrast.</em></p>
+```bash
+python src/data_generation/color/generate_by_color.py \
+  --datasets custom_long \
+  --n-samples 10 \
+  --output-root data/processed/color
+```
 
----
+### 2. Generate Contrast Stimuli
 
-## Stealth Prompt Testset
+```bash
+python src/data_generation/contrast/generate_by_contrast.py \
+  --dataset custom_short \
+  --n-samples 10 \
+  --output-root data/processed/contrast
+```
 
-We construct three subsets that target three distinct behavioral regimes of text-as-image understanding:
+### 3. Run VLM Inference
 
-| Subset | What it tests | # samples | Visual conditions |
-| --- | --- | --- | --- |
-| **(a) Short-sentence Sentiment Set** | Word-level color bias under local lexical integration | 100 | 1 black baseline + 2×6×3 color conditions |
-| **(b) Long-sentence Sentiment Set** | Color bias vs. positional heuristics under structured discourse | 100 | Same 37 color conditions |
-| **(c) VQA Stealth Set** (SQuAD) | Saliency-driven errors when text accessibility is reduced | 100 | 6 grayscale levels × {Global, Answer-Salient, Decoy-Salient} |
+Pass an `experiment_config.json` generated by the data-generation step:
 
-For (c), we sample question–context pairs from SQuAD, window the context around the first ground-truth answer span, and render the question + windowed context as an image. Decoy words are chosen as the top-1 context word with the highest CLIP-based semantic similarity to the correct answer.
+```bash
+python experiments/color/run.py \
+  --manifest data/processed/color/sentiment/custom_short/DroidSans/aa_on/experiment_config.json \
+  --model Qwen/Qwen2-VL-7B-Instruct \
+  --prompt-type forced_choice \
+  --run-id demo
+```
 
-We evaluate four open-source VLMs: **LLaVA-v1.6-Mistral-7B**, **LLaVA-v1.6-Vicuna-7B**, **Qwen2-VL-7B-Instruct**, and **IDEFICS2-8B**.
+For contrast experiments:
 
----
+```bash
+python experiments/contrast/run.py \
+  --manifest data/processed/contrast/sentiment/custom_short/DroidSans/aa_on/experiment_config.json \
+  --model Qwen/Qwen2-VL-7B-Instruct \
+  --prompt-type forced_choice \
+  --run-id demo
+```
 
-## Key Findings
+Outputs are written under `results/`.
 
-### 1. Color prompts induce systematic sentiment biases
+### 4. Analyze Results
 
-On short mixed-sentiment sentences, recoloring sentiment-bearing words systematically shifts predicted polarity. We measure the bias relative to the all-black baseline as
+Compute sentiment metrics:
 
-$$B_c = \frac{1}{N} \sum_{i=1}^{N} m(\hat{y}_{i,c}) - \frac{1}{N} \sum_{i=1}^{N} m(\hat{y}_{i,\text{black}}),$$
+```bash
+python src/evaluation/calc_sentiment_score.py \
+  results/color/Qwen_Qwen2-VL-7B-Instruct/custom_short/demo/raw_outputs/experiment_results.json
+```
 
-with $m(\cdot)\in\{+1, 0, -1\}$ for POSITIVE / NEUTRAL / NEGATIVE.
+Plot a phase-transition style summary:
 
-| Model | Max Pos. ↑ | Max Neg. ↓ | Range |
-| --- | ---: | ---: | ---: |
-| IDEFICS2-8B | +0.160 | −0.360 | 0.520 |
-| LLaVA-Mistral-7B | +0.030 | −0.010 | 0.040 |
-| LLaVA-Vicuna-7B | +0.060 | −0.060 | 0.120 |
-| **Qwen2-VL-7B** | **+0.420** | **−0.480** | **0.900** |
+```bash
+python src/evaluation/plot_phase_transition.py \
+  results/color/Qwen_Qwen2-VL-7B-Instruct/custom_short/demo/raw_outputs/experiment_results.json \
+  --out results/color/Qwen_Qwen2-VL-7B-Instruct/custom_short/demo/analysis/phase_curve.png
+```
 
-Qwen2-VL-7B and IDEFICS2-8B show clear directional, dose-response shifts across hue and intensity; the LLaVA variants are comparatively insensitive to word-level color styling here. This is **task-specific, not general robustness** — in the VQA contrast setup (below) their absolute F1 is very low.
+## CLIP / Representation Probes
 
-<p align="center">
-  <img src="assets/sentimental_short.png" alt="Short-sentence sentiment bias" width="98%">
-</p>
+The `experiments/stealth_visual_prompting/` directory contains scripts for collecting hue-dependent CLIP embeddings and visualizing semantic-axis projections.
 
-### 2. Long sentences shift models toward positional heuristics
+Example:
 
-Under structured long sentences (positive words concentrated in one half, negative in the other), models often adopt a dominant positional strategy and color-induced shifts become secondary:
+```bash
+python experiments/stealth_visual_prompting/run_complete_analysis.py \
+  --output-dir results/stealth_visual_prompting
+```
 
-| Model | Color Bias Range | Positional Strategy | Adherence |
-| --- | ---: | --- | ---: |
-| IDEFICS2-8B | 0.780 | Primacy | 93% |
-| LLaVA-Mistral-7B | 0.000 | Recency | 100% |
-| LLaVA-Vicuna-7B | 0.160 | Primacy | 97% |
-| Qwen2-VL-7B | 0.000 | Recency | 100% |
+See [experiments/stealth_visual_prompting/README.md](experiments/stealth_visual_prompting/README.md) for details.
 
-VLMs may switch between simple heuristics depending on discourse structure: color cues can dominate locally mixed inputs, while position can dominate under structured layouts.
+## Repository Layout
 
-### 3. Hue shifts vision-encoder semantic projections
+```text
+src/
+  data_generation/       # color and contrast stimulus rendering
+  evaluation/            # sentiment, OCR, SQuAD-style metrics
+  models/                # VLM and CLIP/SigLIP handlers
+  utils/                 # rendering and image utilities
+  visualization/         # figure scripts
 
-Probing CLIP with single rendered words and projecting image embeddings onto bipolar semantic axes (valence, emotion, safety, temperature) reveals a shared, hue-dependent modulation across probe words — even though the rendered word string is unchanged.
+experiments/
+  color/                 # color-condition VLM inference
+  contrast/              # contrast-condition VLM inference
+  stealth_visual_prompting/
 
-<p align="center">
-  <img src="assets/a2_hue_tuning_curves_v2.png" alt="CLIP hue tuning curves" width="98%">
-</p>
+scripts/
+  precompute_clip_embeddings.py
+  test_models.py
+  visualize_dual_prompt_results.py
 
-This representation-level shift is consistent with the color-induced sentiment biases observed in end-to-end VLMs.
+docs/                    # GitHub Pages project page
+assets/                  # README/project-page figures
+```
 
-### 4. Contrast prompts increase saliency-driven errors in VQA
+## Notes
 
-In the *Saliency Competition* condition, one span (the answer or a decoy) is rendered in high-contrast black while the rest of the text is rendered at low contrast. We report the **Induced Error Rate (IER)** — the fraction of predictions containing the decoy word — as a direct indicator of saliency-driven shortcut behavior. Note: IER is **not** a general VQA accuracy measure; it isolates decoy copying under reduced visibility, not overall correctness:
-
-| Model | g=1 | g=16 | g=64 | g=128 | g=192 | g=240 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| IDEFICS2-8B | 24% | 23% | 24% | 27% | 32% | **36%** |
-| LLaVA-Mistral-7B | 27% | 25% | 26% | 24% | 24% | 27% |
-| LLaVA-Vicuna-7B | 19% | 19% | 20% | 20% | 22% | 25% |
-| Qwen2-VL-7B | 4% | 4% | 4% | 4% | 5% | 6% |
-
-Higher grayscale value $\Rightarrow$ lower contrast for the non-salient context. As context becomes harder to read, several models increasingly copy the visually salient (but semantically wrong) decoy.
-
-<p align="center">
-  <img src="assets/figure4b_saliency_induced_errors.png" alt="Induced error rate vs. contrast" width="60%">
-</p>
-
-### 5. A model-dependent readability transition
-
-A minimal single-word OCR proxy, applied to the same VLMs, exhibits a non-linear **readability transition**: accuracy rises sharply over a narrow contrast range, and the transition location depends on both model and font size. Small contrast changes can therefore move a model between low- and high-access regimes for visual text.
-
-<p align="center">
-  <img src="assets/a3_min.png" alt="Model-dependent readability transition" width="80%">
-</p>
-
----
-
-## Why this matters
-
-These sensitivities imply a reliability and safety risk for VLM pipelines that ingest documents or UI screenshots: **benign or adversarial styling can steer model decisions without changing the underlying text.** Practical safeguards include:
-
-- normalizing rendered text before inference,
-- cross-checking image-based answers with OCR-extracted text,
-- adding style-invariance checks to evaluation suites.
-
-Limitations include English-only stimuli, RGB-defined intensity levels, and the OCR proxy's limited scope. Future work should test broader rendering factors such as fonts, layout, and multilingual scripts.
-
----
-
-## Repository status
-
-- [x] Project page (this README)
-- [x] Stealth Prompt Testset generation scripts
-- [x] VLM evaluation pipeline (sentiment / VQA / OCR proxy)
-- [x] CLIP semantic-projection probe
-- [x] Visualization scripts for the reported figures
-- [ ] Pre-rendered full stimuli and raw result tables
-
-Large generated stimuli, SQuAD-derived artifacts, and raw VLM outputs are intentionally excluded from Git history. Regenerate them with the scripts under `src/`, `experiments/`, and `scripts/`.
-
----
+- The default rendering size is `800 x 600`, matching the paper setup.
+- The default font family is `DroidSans`; install it or pass `--font-family` to use another font available on your system.
+- Use `--n-samples` for quick debugging before launching full runs.
+- Model outputs can vary with model version, hardware, decoding settings, and library versions.
 
 ## Citation
 
-If you find this work useful, please consider citing:
-
 ```bibtex
 @inproceedings{ide2026seeingred,
-  title     = {Seeing Red, Thinking Bad: Color Bias in Vision Language Models},
-  author    = {Ide, Kohsuke and Yamada, Ryousuke and Fukuhara, Yoshihiro and Kataoka, Hirokatsu and Satoh, Yutaka},
+  title        = {Seeing Red, Thinking Bad: Color Bias in Vision Language Models},
+  author       = {Ide, Kohsuke and Yamada, Ryousuke and Fukuhara, Yoshihiro and Kataoka, Hirokatsu and Satoh, Yutaka},
   year         = {2026},
   howpublished = {Manuscript},
   url          = {https://github.com/KohsukeIde/color-bias-vlm}
 }
 ```
 
-## Acknowledgments
-
-This work was supported by the AIST policy-based budget project "R&D on Generative AI Foundation Models for the Physical Domain". We used ABCI 3.0 provided by AIST and AIST Solutions with support from "ABCI 3.0 Development Acceleration Use".
-
 ## Contact
 
-For questions, please reach out to **Kohsuke Ide** — `ide.agi [at] aist.go.jp`.
+For questions, please contact **Kohsuke Ide** at `ide.agi [at] aist.go.jp`.
