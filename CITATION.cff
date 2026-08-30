@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use this work, please cite the manuscript."
+message: "If you use this work, please cite the paper below."
 title: "Seeing Red, Thinking Bad: Color Bias in Vision Language Models"
 authors:
   - family-names: Ide
@@ -14,3 +14,31 @@ authors:
     given-names: Yutaka
 year: 2026
 url: "https://github.com/KohsukeIde/color-bias-vlm"
+identifiers:
+  - type: doi
+    value: "10.1007/978-3-032-31583-0_18"
+    description: "ICPR 2026 proceedings (Springer LNCS)"
+  - type: other
+    value: "arXiv:2608.14286"
+    description: "arXiv preprint"
+preferred-citation:
+  type: conference-paper
+  title: "Seeing Red, Thinking Bad: Color Bias in Vision Language Models"
+  authors:
+    - family-names: Ide
+      given-names: Kohsuke
+    - family-names: Yamada
+      given-names: Ryousuke
+    - family-names: Fukuhara
+      given-names: Yoshihiro
+    - family-names: Kataoka
+      given-names: Hirokatsu
+    - family-names: Satoh
+      given-names: Yutaka
+  collection-title: "Pattern Recognition (ICPR 2026), Lecture Notes in Computer Science"
+  publisher:
+    name: "Springer Nature Switzerland"
+  start: 261
+  end: 275
+  year: 2026
+  doi: "10.1007/978-3-032-31583-0_18"

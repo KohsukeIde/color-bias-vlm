@@ -1,6 +1,8 @@
 # Seeing Red, Thinking Bad: Color Bias in Vision Language Models
 
 [![Project page](https://img.shields.io/badge/Project_page-color--bias--vlm-3a4a8c)](https://kohsukeide.github.io/color-bias-vlm/)
+[![arXiv](https://img.shields.io/badge/arXiv-2608.14286-b31b1b)](https://arxiv.org/abs/2608.14286)
+[![DOI](https://img.shields.io/badge/DOI-10.1007%2F978--3--032--31583--0__18-blue)](https://doi.org/10.1007/978-3-032-31583-0_18)
 
 Code release for **Seeing Red, Thinking Bad: Color Bias in Vision Language Models**.
 
@@ -153,13 +155,18 @@ assets/                  # README/project-page figures
 
 ## Citation
 
+Published in the ICPR 2026 proceedings ([Springer](https://doi.org/10.1007/978-3-032-31583-0_18)); preprint on [arXiv:2608.14286](https://arxiv.org/abs/2608.14286).
+
 ```bibtex
 @inproceedings{ide2026seeingred,
-  title        = {Seeing Red, Thinking Bad: Color Bias in Vision Language Models},
-  author       = {Ide, Kohsuke and Yamada, Ryousuke and Fukuhara, Yoshihiro and Kataoka, Hirokatsu and Satoh, Yutaka},
-  year         = {2026},
-  howpublished = {Manuscript},
-  url          = {https://github.com/KohsukeIde/color-bias-vlm}
+  title     = {Seeing Red, Thinking Bad: Color Bias in Vision Language Models},
+  author    = {Ide, Kohsuke and Yamada, Ryousuke and Fukuhara, Yoshihiro and Kataoka, Hirokatsu and Satoh, Yutaka},
+  booktitle = {Pattern Recognition (ICPR 2026)},
+  series    = {Lecture Notes in Computer Science},
+  publisher = {Springer Nature Switzerland},
+  pages     = {261--275},
+  year      = {2026},
+  doi       = {10.1007/978-3-032-31583-0_18}
 }
 ```
 
